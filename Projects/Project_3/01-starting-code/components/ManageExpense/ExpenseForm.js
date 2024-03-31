@@ -1,9 +1,31 @@
 import { View } from "react-native"
 
-function ExpenseForm() {
-    return <View>
+import Input from "./Input"
 
-    </View>
+function ExpenseForm() {
+    function amountChangedHandler() {
+
+    }
+
+    return (
+        <View>
+            <Input label="Amount" textInputConfig={{
+                keyboardType: "decimal-pad",
+                onChangeText: amountChangedHandler
+            }} />
+            <Input label="Date" textInputConfig={{
+                placeholder: "YYYY-MM-DD",
+                maxLength: 10,
+                onChangeText: () => { }
+            }} />
+            <Input label="Description" textInputConfig={{
+                multiline: true,
+                numberOfLines: 4,
+                autoCorrect: false, // default is true
+            }} />
+        </View>
+    )
 }
 
 export default ExpenseForm
+
