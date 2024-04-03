@@ -14,7 +14,7 @@ import { GlobalStyles } from "../constants/styles"
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const MAX_TRANSLATE_Y = -SCREEN_HEIGHT + 50;
+const MAX_TRANSLATE_Y = -SCREEN_HEIGHT;
 
 const BottomSheet = React.forwardRef(
     function BottomSheet({ children }, ref) {
@@ -47,7 +47,6 @@ const BottomSheet = React.forwardRef(
                 translateY.value = Math.max(translateY.value, MAX_TRANSLATE_Y);
             })
             .onEnd(() => {
-                console.log(SCREEN_HEIGHT)
                 if (-translateY.value > SCREEN_HEIGHT * 0.8) {
                     scrollTo(0);
                 }

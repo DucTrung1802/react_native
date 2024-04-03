@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, SafeAreaView, Pressable } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetRefProps } from './components/BottomSheet';
@@ -26,14 +26,20 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar style="light" />
         <View style={styles.imagePreviewContainer}>
-
+          <TouchableOpacity
+            onPress={() => { }}
+          >
+            <Image
+              style={styles.imagePreview}
+              source={require('./assets/image_placeholder.png')}
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={startFromPhotoHandler}>
             <Text style={styles.buttonText}>+ Start from Photo</Text>
           </TouchableOpacity>
         </View>
-
         <BottomSheet ref={ref}>
           <View style={{ flex: 1, backgroundColor: GlobalStyles.colors.primary100 }} />
         </BottomSheet>
@@ -50,10 +56,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imagePreviewContainer: {
-    flex: 4
+    flex: 2,
+    alignContent: 'center',
+    justifyContent: "center",
+    // backgroundColor: 'green'
+  },
+  imagePreview: {
+    height: 300,
+    width: 300,
+    borderRadius: 10,
   },
   buttonContainer: {
-    flex: 1
+    flex: 1,
+    // backgroundColor: 'orange',
+    justifyContent: "center",
+    alignItems: 'center',
   },
   button: {
     justifyContent: "center",
