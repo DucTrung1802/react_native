@@ -1,5 +1,5 @@
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import React, { useCallback, useEffect, useImperativeHandle } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import React, { useCallback, useImperativeHandle } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     Extrapolation,
@@ -14,7 +14,7 @@ import { GlobalStyles } from "../constants/styles"
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const MAX_TRANSLATE_Y = -SCREEN_HEIGHT;
+const MAX_TRANSLATE_Y = -SCREEN_HEIGHT - 25;
 
 const BottomSheet = React.forwardRef(
     function BottomSheet({ children }, ref) {

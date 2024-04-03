@@ -1,89 +1,47 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useCallback, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, SafeAreaView, Pressable } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetRefProps } from './components/BottomSheet';
-import { GlobalStyles } from './constants/styles'
+import { StyleSheet } from 'react-native';
+import { GlobalStyles } from './constants/styles';
+
+import ImagePickerScreen from './screens/PhotoPickerScreen';
+import PhotoFullScreen from './screens/PhotoFullScreen';
 
 SplashScreen.preventAutoHideAsync();
 setTimeout(SplashScreen.hideAsync, 1000);
 
+const Stack = createNativeStackNavigator();
+
 export default function App() {
-  const ref = useRef(null);
-
-  const startFromPhotoHandler = useCallback(() => {
-    const isActive = ref?.current?.isActive();
-    if (isActive) {
-      ref?.current?.scrollTo(0);
-    } else {
-      ref?.current?.scrollTo(-400);
-    }
-  }, []);
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <StatusBar style="light" />
-        <View style={styles.imagePreviewContainer}>
-          <TouchableOpacity
-            onPress={() => { }}
-          >
-            <Image
-              style={styles.imagePreview}
-              source={require('./assets/image_placeholder.png')}
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={startFromPhotoHandler}>
-            <Text style={styles.buttonText}>+ Start from Photo</Text>
-          </TouchableOpacity>
-        </View>
-        <BottomSheet ref={ref}>
-          <View style={{ flex: 1, backgroundColor: GlobalStyles.colors.primary100 }} />
-        </BottomSheet>
-      </View>
-    </GestureHandlerRootView>
+    <>
+      <StatusBar style="light" />
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerTintColor: GlobalStyles.colors.primary0,
+            headerStyle: { backgroundColor: GlobalStyles.colors.primary800 },
+          }}
+        >
+          <Stack.Screen
+            name="PhotoPickerScreen"
+            component={ImagePickerScreen}
+            options={{
+              headerShown: true,
+              title: "Photo Picker Screen",
+            }} />
+          <Stack.Screen
+            name="PhotoFullScreen"
+            component={PhotoFullScreen}
+            options={{
+              headerShown: false,
+            }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: GlobalStyles.colors.primary400,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imagePreviewContainer: {
-    flex: 2,
-    alignContent: 'center',
-    justifyContent: "center",
-    // backgroundColor: 'green'
-  },
-  imagePreview: {
-    height: 300,
-    width: 300,
-    borderRadius: 10,
-  },
-  buttonContainer: {
-    flex: 1,
-    // backgroundColor: 'orange',
-    justifyContent: "center",
-    alignItems: 'center',
-  },
-  button: {
-    justifyContent: "center",
-    alignItems: 'center',
-    height: 50,
-    borderRadius: 10,
-    aspectRatio: 6,
-    backgroundColor: GlobalStyles.colors.primary800,
-    opacity: 1,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: 'bold',
-    fontSize: 18,
-  }
 });
