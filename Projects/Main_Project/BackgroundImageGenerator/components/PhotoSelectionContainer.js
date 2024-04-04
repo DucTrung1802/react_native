@@ -1,6 +1,11 @@
 import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
 import { GlobalStyles } from "../constants/styles";
 import CustomButton from "./CustomButton";
+import {
+    launchCameraAsync,
+    useCameraPermissions,
+    PermissionStatus,
+} from 'expo-image-picker';
 
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -8,6 +13,41 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 
 function PhotoSelectionContainer({ resetScroll }) {
+    const [cameraPermissionInformation, requestPermission] =
+        useCameraPermissions();
+
+    async function verifyPermissions() {
+        if (cameraPermissionInformation.status === PermissionStatus.UNDETERMINED) {
+            const permissionResponse = await requestPermission();
+
+            return permissionResponse.granted;
+        }
+
+        if (cameraPermissionInformation.status === PermissionStatus.DENIED) {
+            Alert.alert(
+                'Insufficient Permissions!',
+                'You need to grant camera permissions to use this app.'
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    async function StartCameraHandler() {
+        const hasPermission = await verifyPermissions();
+
+        if (!hasPermission) {
+            return;
+        }
+
+        const photo = await launchCameraAsync({
+            allowsEditing: true,
+            quality: 1
+        });
+        console.log(photo);
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -26,7 +66,7 @@ function PhotoSelectionContainer({ resetScroll }) {
                 <CustomButton
                     icon={<Feather name="camera" size={24} color="white" />}
                     text="Camera"
-                    onPress={() => { }}
+                    onPress={StartCameraHandler}
                 />
                 <CustomButton
                     icon={<FontAwesome name="image" size={24} color="white" />}

@@ -25,6 +25,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Grant the Camera permissions to take the photo from Camera.",
+          "photosPermission": "Grant the Photo Library permissions to pick an image from Photo Library."
+        }
+      ]
+    ]
   }
 }
