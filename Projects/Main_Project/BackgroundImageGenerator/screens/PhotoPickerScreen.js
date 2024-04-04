@@ -3,6 +3,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
 import { StyleSheet, Text, View, TouchableOpacity, Image, } from 'react-native';
+import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 
 function ImagePickerScreen({ navigation }) {
     const ref = useRef(null);
@@ -12,7 +13,7 @@ function ImagePickerScreen({ navigation }) {
         if (isActive) {
             ref?.current?.scrollTo(0);
         } else {
-            ref?.current?.scrollTo(-400);
+            ref?.current?.scrollTo(-420);
         }
     }, []);
 
@@ -21,7 +22,8 @@ function ImagePickerScreen({ navigation }) {
             <View style={styles.container}>
                 <View style={styles.imagePreviewContainer}>
                     <TouchableOpacity
-                        onPress={() => { navigation.navigate("PhotoFullScreen") }}
+                        // onPress={() => { navigation.navigate("PhotoFullScreen") }}
+                        onPress={() => { }}
                     >
                         <Image
                             style={styles.imagePreview}
@@ -34,11 +36,11 @@ function ImagePickerScreen({ navigation }) {
                         <Text style={styles.buttonText}>+ Choose a photo</Text>
                     </TouchableOpacity>
                 </View>
-                <BottomSheet ref={ref}>
-                    <View style={{ flex: 1, backgroundColor: GlobalStyles.colors.primary100 }} />
+                <BottomSheet ref={ref} >
+                    <PhotoSelectionContainer />
                 </BottomSheet>
             </View>
-        </GestureHandlerRootView>
+        </GestureHandlerRootView >
     )
 }
 
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     imagePreviewContainer: {
-        flex: 2,
+        flex: 1.2,
         alignContent: 'center',
         justifyContent: "center",
         // backgroundColor: 'green'
