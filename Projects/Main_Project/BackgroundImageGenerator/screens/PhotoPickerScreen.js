@@ -17,6 +17,13 @@ function ImagePickerScreen({ navigation }) {
         }
     }, []);
 
+    const resetScrollHandler = useCallback(() => {
+        const isActive = ref?.current?.isActive();
+        if (isActive) {
+            ref?.current?.scrollTo(0);
+        }
+    })
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <View style={styles.container}>
@@ -37,7 +44,7 @@ function ImagePickerScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
                 <BottomSheet ref={ref} >
-                    <PhotoSelectionContainer />
+                    <PhotoSelectionContainer resetScroll={resetScrollHandler} />
                 </BottomSheet>
             </View>
         </GestureHandlerRootView >

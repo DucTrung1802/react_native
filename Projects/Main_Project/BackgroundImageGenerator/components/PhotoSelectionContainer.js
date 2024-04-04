@@ -7,12 +7,12 @@ import { Feather } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 
-function PhotoSelectionContainer() {
+function PhotoSelectionContainer({ resetScroll }) {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.headerCancelButtonContainer}>
-                    <TouchableOpacity onPress={() => { }}>
+                    <TouchableOpacity onPress={() => { resetScroll() }}>
                         <FontAwesome6 name="x" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
