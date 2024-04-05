@@ -2,20 +2,50 @@ import React, { useCallback, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
-import { StyleSheet, Text, View, TouchableOpacity, Image, } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
+import {
+    useCameraPermissions,
+    PermissionStatus,
+} from 'expo-image-picker';
 
 function ImagePickerScreen({ navigation }) {
     const ref = useRef(null);
+    const [cameraPermissionInformation, requestPermission] =
+        useCameraPermissions();
 
-    const startFromPhotoHandler = useCallback(() => {
+    async function verifyPermissions() {
+        if (cameraPermissionInformation.status === PermissionStatus.UNDETERMINED) {
+            const permissionResponse = await requestPermission();
+
+            return permissionResponse.granted;
+        }
+
+        if (cameraPermissionInformation.status === PermissionStatus.DENIED) {
+            Alert.alert(
+                'Insufficient Permissions!',
+                'You need to grant camera permissions to use this app.'
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    async function startFromPhotoHandler() {
+        const hasPermission = await verifyPermissions();
+
+        if (!hasPermission) {
+            return;
+        }
+
         const isActive = ref?.current?.isActive();
         if (isActive) {
             ref?.current?.scrollTo(0);
         } else {
             ref?.current?.scrollTo(-420);
         }
-    }, []);
+    }
 
     const resetScrollHandler = useCallback(() => {
         const isActive = ref?.current?.isActive();
