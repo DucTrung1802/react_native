@@ -3,6 +3,7 @@ import { createContext, useState } from 'react';
 export const ImageContext = createContext({
     imageInClipboard: false,
     mainImage: {
+        id: 0,
         uri: null,
         size: {
             height: 0,
@@ -24,6 +25,8 @@ function ContextProvider({ children }) {
     }
 
     function setMainCurrentImage(newMainImage) {
+        var nextID = currentImageList.length + 1
+        newMainImage.id = nextID
         setCurrentMainImage(newMainImage)
         setCurrentImageList((imageList) => [...imageList, newMainImage])
     }
