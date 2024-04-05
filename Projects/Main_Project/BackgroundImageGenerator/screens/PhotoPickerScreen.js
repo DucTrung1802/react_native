@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useRef } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
@@ -9,6 +9,7 @@ import {
     PermissionStatus,
 } from 'expo-image-picker';
 import { ImageContext } from "../store/ContextProvider";
+import * as Clipboard from 'expo-clipboard';
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -37,12 +38,21 @@ function ImagePickerScreen({ navigation }) {
         return true;
     }
 
+    async function checkClipboard() {
+        let photo = await Clipboard.getImageAsync({})
+        if (photo.data && photo.size.height > 0 && photo.size.width > 0) {
+            appContext.setImageInClipboard(true)
+        }
+    }
+
     async function startFromPhotoHandler() {
         const hasPermission = await verifyPermissions();
 
         if (!hasPermission) {
             return;
         }
+
+        await checkClipboard()
 
         const isActive = ref?.current?.isActive();
         if (isActive) {
@@ -74,7 +84,10 @@ function ImagePickerScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={startFromPhotoHandler}>
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={startFromPhotoHandler}
+                    >
                         <Text style={styles.buttonText}>+ Choose a photo</Text>
                     </TouchableOpacity>
                 </View>

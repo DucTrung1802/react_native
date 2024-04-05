@@ -1,6 +1,7 @@
 import { createContext, useState } from 'react';
 
 export const ImageContext = createContext({
+    imageInClipboard: false,
     mainImage: {
         uri: null,
         size: {
@@ -9,12 +10,18 @@ export const ImageContext = createContext({
         }
     },
     imageList: [],
+    setImageInClipboard: (imageInClipboard) => { },
     setMainImage: async (image) => { },
 });
 
 function ContextProvider({ children }) {
+    const [currentImageInClipboard, setCurrentImageInClipboard] = useState(false)
     const [currentMainImage, setCurrentMainImage] = useState({})
     const [currentImageList, setCurrentImageList] = useState([])
+
+    function setImageInClipboard(imageInClipboard) {
+        setCurrentImageInClipboard(imageInClipboard)
+    }
 
     function setMainCurrentImage(newMainImage) {
         setCurrentMainImage(newMainImage)
@@ -22,8 +29,10 @@ function ContextProvider({ children }) {
     }
 
     const value = {
+        imageInClipboard: currentImageInClipboard,
         mainImage: currentMainImage,
         imageList: currentImageList,
+        setImageInClipboard: setImageInClipboard,
         setMainImage: setMainCurrentImage
     }
 

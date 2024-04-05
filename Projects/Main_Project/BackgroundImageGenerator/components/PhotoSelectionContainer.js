@@ -57,19 +57,24 @@ function PhotoSelectionContainer({ resetScroll }) {
     }
 
     async function OpenFileHandler() {
-        let result = await DocumentPicker.getDocumentAsync({
+        let photo = await DocumentPicker.getDocumentAsync({
             type: 'image/*',
             copyToCacheDirectory: false,
         })
 
-        console.log(result)
+        if (!photo.canceled && photo.assets.length > 0) {
+            const imageUri = photo.assets[0].uri;
 
-        if (!result.canceled && result.assets.length > 0) {
-            const imageUri = result.assets[0].uri;
-
-            // Fetch image dimensions
-            Image.getSize(imageUri, (width, height) => {
-                console.log('Image resolution:', width, 'x', height);
+            Image.getSize(imageUri, async (width, height) => {
+                var newPhoto = {
+                    uri: imageUri,
+                    size: {
+                        height: height,
+                        width: width
+                    }
+                }
+                await appContext.setMainImage(newPhoto)
+                resetScroll()
             }, (error) => {
                 console.error('Error getting image size:', error);
             });
@@ -77,11 +82,18 @@ function PhotoSelectionContainer({ resetScroll }) {
     }
 
     async function ClipboardHandler() {
-        let imageContent = await Clipboard.getImageAsync({})
-        if (imageContent) {
-            setImageURI(imageContent.data);
+        let photo = await Clipboard.getImageAsync({})
+        if (photo.data && photo.size.height > 0 && photo.size.width > 0) {
+            var newPhoto = {
+                uri: photo.data,
+                size: {
+                    height: photo.size.height,
+                    width: photo.size.width
+                }
+            }
+            await appContext.setMainImage(newPhoto)
+            resetScroll()
         }
-        console.log(imageContent)
     }
 
     return (
@@ -118,7 +130,7 @@ function PhotoSelectionContainer({ resetScroll }) {
                     icon={<Fontisto name="scissors" size={24} color="white" />}
                     text="Clipboard"
                     onPress={ClipboardHandler}
-                    disabled={true}
+                    disabled={!appContext.imageInClipboard}
                 />
             </View>
             <View style={styles.photoGridContainer}>
