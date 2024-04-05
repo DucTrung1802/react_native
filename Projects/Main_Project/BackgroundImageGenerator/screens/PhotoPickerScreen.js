@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useContext, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
@@ -8,9 +8,14 @@ import {
     useCameraPermissions,
     PermissionStatus,
 } from 'expo-image-picker';
+import { ImageContext } from "../store/ContextProvider";
 
 function ImagePickerScreen({ navigation }) {
+    const appContext = useContext(ImageContext)
+
+    const imagePlaceholder = require('../assets/image_placeholder.png')
     const ref = useRef(null);
+
     const [cameraPermissionInformation, requestPermission] =
         useCameraPermissions();
 
@@ -43,7 +48,7 @@ function ImagePickerScreen({ navigation }) {
         if (isActive) {
             ref?.current?.scrollTo(0);
         } else {
-            ref?.current?.scrollTo(-420);
+            ref?.current?.scrollTo(-400);
         }
     }
 
@@ -64,7 +69,7 @@ function ImagePickerScreen({ navigation }) {
                     >
                         <Image
                             style={styles.imagePreview}
-                            source={require('../assets/image_placeholder.png')}
+                            source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
                         />
                     </TouchableOpacity>
                 </View>
@@ -97,8 +102,8 @@ const styles = StyleSheet.create({
         // backgroundColor: 'green'
     },
     imagePreview: {
-        height: 300,
-        width: 300,
+        height: 350,
+        width: 350,
         borderRadius: 10,
     },
     buttonContainer: {

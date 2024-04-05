@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image } from "react-native";
 import { GlobalStyles } from "../constants/styles";
 import CustomButton from "./CustomButton";
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Clipboard from 'expo-clipboard';
+import { ImageContext } from "../store/ContextProvider"
 
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -12,28 +13,46 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 
 function PhotoSelectionContainer({ resetScroll }) {
-    const [imageURI, setImageURI] = useState(null);
+    const appContext = useContext(ImageContext)
 
     async function StartCameraHandler() {
         const photo = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
+            aspect: [1, 1],
             quality: 1
         })
-        console.log(photo)
+
+        if (!photo.canceled) {
+            var newPhoto = {
+                uri: photo.assets[0].uri,
+                size: {
+                    height: photo.assets[0].height,
+                    width: photo.assets[0].width
+                }
+            }
+            await appContext.setMainImage(newPhoto)
+            resetScroll()
+        }
     }
 
     async function OpenGalleryHandler() {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
+        let photo = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [1, 1],
             quality: 1,
         });
 
-        console.log(result);
-
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
+        if (!photo.canceled) {
+            var newPhoto = {
+                uri: photo.assets[0].uri,
+                size: {
+                    height: photo.assets[0].height,
+                    width: photo.assets[0].width
+                }
+            }
+            await appContext.setMainImage(newPhoto)
+            resetScroll()
         }
     }
 
@@ -44,6 +63,17 @@ function PhotoSelectionContainer({ resetScroll }) {
         })
 
         console.log(result)
+
+        if (!result.canceled && result.assets.length > 0) {
+            const imageUri = result.assets[0].uri;
+
+            // Fetch image dimensions
+            Image.getSize(imageUri, (width, height) => {
+                console.log('Image resolution:', width, 'x', height);
+            }, (error) => {
+                console.error('Error getting image size:', error);
+            });
+        }
     }
 
     async function ClipboardHandler() {
@@ -88,16 +118,11 @@ function PhotoSelectionContainer({ resetScroll }) {
                     icon={<Fontisto name="scissors" size={24} color="white" />}
                     text="Clipboard"
                     onPress={ClipboardHandler}
-                    disabled={false}
+                    disabled={true}
                 />
             </View>
             <View style={styles.photoGridContainer}>
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'top' }}>
-                    <Image
-                        source={{ uri: imageURI }}
-                        style={{ width: 300, height: 300 }} // Set your desired width and height
-                    />
-                </View>
+
             </View>
         </View>
     )

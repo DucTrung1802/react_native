@@ -7,6 +7,7 @@ import { GlobalStyles } from './constants/styles';
 
 import ImagePickerScreen from './screens/PhotoPickerScreen';
 import PhotoFullScreen from './screens/PhotoFullScreen';
+import ContextProvider from './store/ContextProvider';
 
 SplashScreen.preventAutoHideAsync();
 setTimeout(SplashScreen.hideAsync, 1000);
@@ -17,28 +18,30 @@ export default function App() {
   return (
     <>
       <StatusBar style="light" />
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerTintColor: GlobalStyles.colors.primary0,
-            headerStyle: { backgroundColor: GlobalStyles.colors.primary800 },
-          }}
-        >
-          <Stack.Screen
-            name="PhotoPickerScreen"
-            component={ImagePickerScreen}
-            options={{
-              headerShown: true,
-              title: "Photo Picker Screen",
-            }} />
-          <Stack.Screen
-            name="PhotoFullScreen"
-            component={PhotoFullScreen}
-            options={{
-              headerShown: false,
-            }} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <ContextProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerTintColor: GlobalStyles.colors.primary0,
+              headerStyle: { backgroundColor: GlobalStyles.colors.primary800 },
+            }}
+          >
+            <Stack.Screen
+              name="PhotoPickerScreen"
+              component={ImagePickerScreen}
+              options={{
+                headerShown: true,
+                title: "Photo Picker Screen",
+              }} />
+            <Stack.Screen
+              name="PhotoFullScreen"
+              component={PhotoFullScreen}
+              options={{
+                headerShown: false,
+              }} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ContextProvider>
     </>
   );
 }
