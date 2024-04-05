@@ -1,9 +1,10 @@
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text, Image } from "react-native";
 import { GlobalStyles } from "../constants/styles";
 import CustomButton from "./CustomButton";
-import {
-    launchCameraAsync,
-} from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as Clipboard from 'expo-clipboard';
 
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -11,12 +12,46 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Fontisto } from '@expo/vector-icons';
 
 function PhotoSelectionContainer({ resetScroll }) {
+    const [imageURI, setImageURI] = useState(null);
+
     async function StartCameraHandler() {
-        const photo = await launchCameraAsync({
+        const photo = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
             quality: 1
+        })
+        console.log(photo)
+    }
+
+    async function OpenGalleryHandler() {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
         });
-        console.log(photo);
+
+        console.log(result);
+
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
+    }
+
+    async function OpenFileHandler() {
+        let result = await DocumentPicker.getDocumentAsync({
+            type: 'image/*',
+            copyToCacheDirectory: false,
+        })
+
+        console.log(result)
+    }
+
+    async function ClipboardHandler() {
+        let imageContent = await Clipboard.getImageAsync({})
+        if (imageContent) {
+            setImageURI(imageContent.data);
+        }
+        console.log(imageContent)
     }
 
     return (
@@ -42,22 +77,27 @@ function PhotoSelectionContainer({ resetScroll }) {
                 <CustomButton
                     icon={<FontAwesome name="image" size={24} color="white" />}
                     text="Gallery"
-                    onPress={() => { }}
+                    onPress={OpenGalleryHandler}
                 />
                 <CustomButton
                     icon={<Feather name="folder" size={24} color="white" />}
                     text="Files"
-                    onPress={() => { }}
+                    onPress={OpenFileHandler}
                 />
                 <CustomButton
                     icon={<Fontisto name="scissors" size={24} color="white" />}
                     text="Clipboard"
-                    onPress={() => { }}
-                    disabled={true}
+                    onPress={ClipboardHandler}
+                    disabled={false}
                 />
             </View>
             <View style={styles.photoGridContainer}>
-
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'top' }}>
+                    <Image
+                        source={{ uri: imageURI }}
+                        style={{ width: 300, height: 300 }} // Set your desired width and height
+                    />
+                </View>
             </View>
         </View>
     )
