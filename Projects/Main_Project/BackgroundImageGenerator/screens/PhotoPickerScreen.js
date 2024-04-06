@@ -1,8 +1,12 @@
-import React, { useCallback, useContext, useRef, useEffect } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import React, { useCallback, useContext, useRef, useEffect, useState } from 'react';
+import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
-import { AppState, StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
+import {
+    AppState, StyleSheet, Text, View,
+    TouchableOpacity, Image, Alert, ScrollView,
+    TouchableWithoutFeedback, Keyboard
+} from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import {
     useCameraPermissions,
@@ -21,15 +25,22 @@ function ImagePickerScreen({ navigation }) {
     const [cameraPermissionInformation, requestPermission] =
         useCameraPermissions();
 
+    const [text, setChangeText] = useState("");
+
     useEffect(() => {
         // Add event listener when component mounts
         AppState.addEventListener("change", handleAppStateChange);
 
         // Remove event listener when component unmounts
         return () => {
-            AppState.removeEventListener("change", handleAppStateChange);
+            // AppState.removeEventListener("change", handleAppStateChange);
         };
     }, []);
+
+    function onChangeTextHandler(value) {
+        value.replace("\n", "")
+        setChangeText(value)
+    }
 
     const handleAppStateChange = async (nextAppState) => {
         if (nextAppState === 'active') {
@@ -109,42 +120,66 @@ function ImagePickerScreen({ navigation }) {
         }
     })
 
+    const handlePressOutside = () => {
+        Keyboard.dismiss(); // Dismiss the keyboard
+    };
+
+    function generateButtonHandler() {
+        console.log(text)
+    }
+
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
-            <View style={styles.container}>
-                <View style={styles.imagePreviewContainer}>
-                    <TouchableOpacity
-                        // onPress={() => { navigation.navigate("PhotoFullScreen") }}
-                        onPress={() => { }}
-                    >
-                        <Image
-                            style={styles.imagePreview}
-                            source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
-                        />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={startFromPhotoHandler}
-                    >
-                        <Text style={styles.buttonText}>+ Choose a Photo</Text>
-                    </TouchableOpacity>
-                    {/* <TouchableOpacity
-                        style={styles.button}
-                        onPress={startFromPhotoHandler}
-                    >
-                        <Text style={styles.buttonText}>+ Choose a Photo</Text>
-                    </TouchableOpacity> */}
-                    {/* <CustomButton
-                        text="Files"
-                    /> */}
-                </View>
-                <BottomSheet ref={ref} >
-                    <PhotoSelectionContainer resetScroll={resetScrollHandler} />
-                </BottomSheet>
-            </View>
-        </GestureHandlerRootView >
+        <TouchableWithoutFeedback onPress={handlePressOutside}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <View style={styles.container}>
+                    <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 2.2 : 6 }}>
+                        <TouchableWithoutFeedback onPress={handlePressOutside}>
+                            <Image
+                                style={styles.imagePreview}
+                                source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
+                            />
+                        </TouchableWithoutFeedback>
+                    </View>
+                    {appContext.mainImage.uri && <View style={styles.titleContainer}>
+                        <Text style={styles.title}>Prompt</Text>
+                    </View>}
+                    <View style={styles.interactContainer}>
+                        <ScrollView>
+                            {appContext.mainImage.uri && <View style={styles.textInputContainer}>
+                                <TextInput
+                                    editable
+                                    multiline
+                                    textAlignVertical='top'
+                                    numberOfLines={4}
+                                    maxLength={150}
+                                    placeholder="Enter your prompt here..."
+                                    value={text}
+                                    placeholderTextColor="#b3b3b3"
+                                    onChangeText={text => onChangeTextHandler(text)}
+                                    style={styles.textInput}
+                                    keyboardType="default"
+                                />
+                            </View>}
+                            {appContext.mainImage.uri && <CustomButton
+                                text={"Generate Background"}
+                                onPress={generateButtonHandler}
+                                buttonStyle={styles.generateButton}
+                                buttonTextStyle={styles.buttonText}
+                            />}
+                            <CustomButton
+                                text={"+ Choose a Photo"}
+                                onPress={startFromPhotoHandler}
+                                buttonStyle={styles.chooseButton}
+                                buttonTextStyle={styles.buttonText}
+                            />
+                        </ScrollView>
+                    </View>
+                    <BottomSheet ref={ref} >
+                        <PhotoSelectionContainer resetScroll={resetScrollHandler} />
+                    </BottomSheet>
+                </View >
+            </GestureHandlerRootView >
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -158,10 +193,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     imagePreviewContainer: {
-        flex: 1,
+        flex: 2.2,
         alignContent: 'center',
         justifyContent: "top",
-        padding: 20
+        padding: 15,
         // backgroundColor: 'green'
     },
     imagePreview: {
@@ -169,19 +204,52 @@ const styles = StyleSheet.create({
         width: 350,
         borderRadius: 10,
     },
-    buttonContainer: {
-        flex: 1,
-        // backgroundColor: 'orange',
-        justifyContent: "center",
-        alignItems: 'center',
+    titleContainer: {
+        // backgroundColor: "red",
+        width: "90%"
     },
-    button: {
+    title: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 20
+    },
+    interactContainer: {
+        flex: 2,
+        // backgroundColor: 'orange',
+        width: "100%",
+        justifyContent: 'center'
+    },
+    textInputContainer: {
+        marginHorizontal: "5%",
+        backgroundColor: GlobalStyles.colors.primary800,
+        marginVertical: 10,
+        borderRadius: 10,
+        // backgroundColor: "red"
+    },
+    textInput: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 17,
+    },
+    chooseButton: {
+        marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
         height: 50,
         borderRadius: 10,
-        aspectRatio: 6,
         backgroundColor: GlobalStyles.colors.primary800,
+        opacity: 1,
+        marginVertical: 10
+    },
+    generateButton: {
+        marginHorizontal: "10%",
+        justifyContent: "center",
+        alignItems: 'center',
+        height: 50,
+        borderRadius: 10,
+        backgroundColor: GlobalStyles.colors.error500,
         opacity: 1,
         marginVertical: 10
     },
