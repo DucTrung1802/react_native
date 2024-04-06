@@ -10,6 +10,7 @@ import {
 } from 'expo-image-picker';
 import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
+import { getString } from '../backend/http';
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -40,7 +41,7 @@ function ImagePickerScreen({ navigation }) {
 
     async function checkClipboard() {
         let photo = await Clipboard.getImageAsync({})
-        if (photo.data && photo.size.height > 0 && photo.size.width > 0) {
+        if (photo && photo.data && photo.size.height > 0 && photo.size.width > 0) {
             if (photo.data != appContext.imageInClipboard) {
                 appContext.setImageInClipboard(photo.data)
                 appContext.setDisableClipboardButton(false)

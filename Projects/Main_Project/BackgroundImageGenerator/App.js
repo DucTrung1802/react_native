@@ -15,35 +15,35 @@ setTimeout(SplashScreen.hideAsync, 1000);
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <>
-      <StatusBar style="light" />
-      <ContextProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{
-              headerTintColor: GlobalStyles.colors.primary0,
-              headerStyle: { backgroundColor: GlobalStyles.colors.primary800 },
-            }}
-          >
-            <Stack.Screen
-              name="PhotoPickerScreen"
-              component={ImagePickerScreen}
-              options={{
-                headerShown: true,
-                title: "Photo Picker Screen",
-              }} />
-            <Stack.Screen
-              name="PhotoFullScreen"
-              component={PhotoFullScreen}
-              options={{
-                headerShown: false,
-              }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ContextProvider>
-    </>
-  );
+    return (
+        <>
+            <StatusBar style="light" />
+            <ContextProvider>
+                <NavigationContainer>
+                    <Stack.Navigator
+                        screenOptions={{
+                            headerTintColor: GlobalStyles.colors.primary0,
+                            headerStyle: { backgroundColor: GlobalStyles.colors.primary800 },
+                        }}
+                    >
+                        <Stack.Screen
+                            name="PhotoPickerScreen"
+                            component={ImagePickerScreen}
+                            options={{
+                                headerShown: true,
+                                title: "Photo Picker Screen",
+                            }} />
+                        <Stack.Screen
+                            name="PhotoFullScreen"
+                            component={PhotoFullScreen}
+                            options={{
+                                headerShown: false,
+                            }} />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </ContextProvider>
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
