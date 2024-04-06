@@ -41,9 +41,10 @@ function ImagePickerScreen({ navigation }) {
     async function checkClipboard() {
         let photo = await Clipboard.getImageAsync({})
         if (photo.data && photo.size.height > 0 && photo.size.width > 0) {
-            photo.data != appContext.mainImage.uri ?
-                appContext.setImageInClipboard(true) :
-                appContext.setImageInClipboard(false)
+            if (photo.data != appContext.imageInClipboard) {
+                appContext.setImageInClipboard(photo.data)
+                appContext.setDisableClipboardButton(false)
+            }
         }
     }
 

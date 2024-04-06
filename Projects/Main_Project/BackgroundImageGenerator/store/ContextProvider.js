@@ -1,9 +1,10 @@
 import { createContext, useState } from 'react';
+import { MAX_IMAGE_STORE } from '../constants/styles';
 
 export const ImageContext = createContext({
-    imageInClipboard: false,
+    disableClipboardButton: true,
+    imageInClipboard: null,
     mainImage: {
-        id: 0,
         uri: null,
         size: {
             height: 0,
@@ -11,32 +12,47 @@ export const ImageContext = createContext({
         }
     },
     imageList: [],
+    setDisableClipboardButton: (value) => { },
     setImageInClipboard: (imageInClipboard) => { },
-    setMainImage: async (image) => { },
+    setMainImage: (image) => { },
+    setMainImageAndAdd: async (image) => { },
 });
 
 function ContextProvider({ children }) {
-    const [currentImageInClipboard, setCurrentImageInClipboard] = useState(false)
+    const [currentDisableClipboardButton, setCurrentDisableClipboardButton] = useState(true)
+    const [currentImageInClipboard, setCurrentImageInClipboard] = useState(null)
     const [currentMainImage, setCurrentMainImage] = useState({})
     const [currentImageList, setCurrentImageList] = useState([])
+
+    function setDisableClipboardButton(value) {
+        setCurrentDisableClipboardButton(value)
+    }
 
     function setImageInClipboard(imageInClipboard) {
         setCurrentImageInClipboard(imageInClipboard)
     }
 
     function setMainCurrentImage(newMainImage) {
-        var nextID = currentImageList.length + 1
-        newMainImage.id = nextID
         setCurrentMainImage(newMainImage)
-        setCurrentImageList((imageList) => [...imageList, newMainImage])
+    }
+
+    function setMainCurrentImageAndAddToList(newMainImage) {
+        if (currentImageList.length == MAX_IMAGE_STORE) {
+            currentImageList.pop()
+        }
+        setCurrentMainImage(newMainImage)
+        setCurrentImageList((imageList) => [newMainImage, ...imageList])
     }
 
     const value = {
+        disableClipboardButton: currentDisableClipboardButton,
         imageInClipboard: currentImageInClipboard,
         mainImage: currentMainImage,
         imageList: currentImageList,
+        setDisableClipboardButton: setDisableClipboardButton,
         setImageInClipboard: setImageInClipboard,
-        setMainImage: setMainCurrentImage
+        setMainImage: setMainCurrentImage,
+        setMainImageAndAdd: setMainCurrentImageAndAddToList
     }
 
     return (

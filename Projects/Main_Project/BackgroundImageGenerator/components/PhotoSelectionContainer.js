@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Clipboard from 'expo-clipboard';
 import { ImageContext } from "../store/ContextProvider"
+import FlatListImage from './FlatListImage';
 
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -30,7 +31,7 @@ function PhotoSelectionContainer({ resetScroll }) {
                     width: photo.assets[0].width
                 }
             }
-            await appContext.setMainImage(newPhoto)
+            await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
         }
     }
@@ -51,7 +52,7 @@ function PhotoSelectionContainer({ resetScroll }) {
                     width: photo.assets[0].width
                 }
             }
-            await appContext.setMainImage(newPhoto)
+            await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
         }
     }
@@ -73,7 +74,7 @@ function PhotoSelectionContainer({ resetScroll }) {
                         width: width
                     }
                 }
-                await appContext.setMainImage(newPhoto)
+                await appContext.setMainImageAndAdd(newPhoto)
                 resetScroll()
             }, (error) => {
                 console.error('Error getting image size:', error);
@@ -82,6 +83,7 @@ function PhotoSelectionContainer({ resetScroll }) {
     }
 
     async function ClipboardHandler() {
+        appContext.setDisableClipboardButton(true)
         let photo = await Clipboard.getImageAsync({})
         if (photo.data && photo.size.height > 0 && photo.size.width > 0) {
             var newPhoto = {
@@ -91,7 +93,7 @@ function PhotoSelectionContainer({ resetScroll }) {
                     width: photo.size.width
                 }
             }
-            await appContext.setMainImage(newPhoto)
+            await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
         }
     }
@@ -130,11 +132,14 @@ function PhotoSelectionContainer({ resetScroll }) {
                     icon={<Fontisto name="scissors" size={24} color="white" />}
                     text="Clipboard"
                     onPress={ClipboardHandler}
-                    disabled={!appContext.imageInClipboard}
+                    disabled={appContext.disableClipboardButton}
                 />
             </View>
             <View style={styles.photoGridContainer}>
-
+                <View style={styles.titleContainer}>
+                    <Text style={styles.headerTitleText}>History</Text>
+                </View>
+                <FlatListImage resetScroll={resetScroll} />
             </View>
         </View>
     )
@@ -177,6 +182,11 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: GlobalStyles.colors.primary200,
         paddingHorizontal: "2%"
+    },
+    titleContainer: {
+        marginHorizontal: 20,
+        alignItems: "center",
+        marginBottom: 5
     },
     photoGridContainer: {
         flex: 7,

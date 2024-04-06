@@ -15,3 +15,5 @@ export const GlobalStyles = {
         gray700: '#221c30',
     },
 };
+
+export const MAX_IMAGE_STORE = 12
