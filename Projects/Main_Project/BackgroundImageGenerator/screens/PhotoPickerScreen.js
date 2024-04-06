@@ -1,8 +1,8 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
-import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
+import { AppState, StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import {
     useCameraPermissions,
@@ -10,7 +10,7 @@ import {
 } from 'expo-image-picker';
 import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
-import { getString } from '../backend/http';
+import CustomButton from "../components/CustomButton";
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -20,6 +20,39 @@ function ImagePickerScreen({ navigation }) {
 
     const [cameraPermissionInformation, requestPermission] =
         useCameraPermissions();
+
+    useEffect(() => {
+        // Add event listener when component mounts
+        AppState.addEventListener("change", handleAppStateChange);
+
+        // Remove event listener when component unmounts
+        return () => {
+            AppState.removeEventListener("change", handleAppStateChange);
+        };
+    }, []);
+
+    const handleAppStateChange = async (nextAppState) => {
+        if (nextAppState === 'active') {
+            // App has come to the foreground
+            // Call your function here
+            handleAppForeground()
+            await checkClipboard()
+        } else if (nextAppState === 'background') {
+            // App has gone to the background
+            // Call your function here
+            handleAppBackground();
+        }
+    };
+
+    const handleAppForeground = () => {
+        // Add your code to execute when the app is in the foreground
+        console.log("App is in the foreground");
+    };
+
+    const handleAppBackground = () => {
+        // Add your code to execute when the app is in the background
+        console.log("App is in the background");
+    };
 
     async function verifyPermissions() {
         if (cameraPermissionInformation.status === PermissionStatus.UNDETERMINED) {
@@ -40,9 +73,13 @@ function ImagePickerScreen({ navigation }) {
     }
 
     async function checkClipboard() {
-        let photo = await Clipboard.getImageAsync({})
+        let photo = null
+        try {
+            photo = await Clipboard.getImageAsync({})
+        }
+        catch (err) { }
         if (photo && photo.data && photo.size.height > 0 && photo.size.width > 0) {
-            if (photo.data != appContext.imageInClipboard) {
+            if (!appContext.imageList.some(item => item.uri === photo.data)) {
                 appContext.setImageInClipboard(photo.data)
                 appContext.setDisableClipboardButton(false)
             }
@@ -65,7 +102,6 @@ function ImagePickerScreen({ navigation }) {
             ref?.current?.scrollTo(-400);
         }
     }
-
     const resetScrollHandler = useCallback(() => {
         const isActive = ref?.current?.isActive();
         if (isActive) {
@@ -92,8 +128,17 @@ function ImagePickerScreen({ navigation }) {
                         style={styles.button}
                         onPress={startFromPhotoHandler}
                     >
-                        <Text style={styles.buttonText}>+ Choose a photo</Text>
+                        <Text style={styles.buttonText}>+ Choose a Photo</Text>
                     </TouchableOpacity>
+                    {/* <TouchableOpacity
+                        style={styles.button}
+                        onPress={startFromPhotoHandler}
+                    >
+                        <Text style={styles.buttonText}>+ Choose a Photo</Text>
+                    </TouchableOpacity> */}
+                    {/* <CustomButton
+                        text="Files"
+                    /> */}
                 </View>
                 <BottomSheet ref={ref} >
                     <PhotoSelectionContainer resetScroll={resetScrollHandler} />
@@ -113,9 +158,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     imagePreviewContainer: {
-        flex: 1.2,
+        flex: 1,
         alignContent: 'center',
-        justifyContent: "center",
+        justifyContent: "top",
+        padding: 20
         // backgroundColor: 'green'
     },
     imagePreview: {
@@ -137,6 +183,7 @@ const styles = StyleSheet.create({
         aspectRatio: 6,
         backgroundColor: GlobalStyles.colors.primary800,
         opacity: 1,
+        marginVertical: 10
     },
     buttonText: {
         color: "white",
