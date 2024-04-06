@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
-import { FlatList, SafeAreaView, StyleSheet } from "react-native"
+import { StyleSheet, SafeAreaView } from "react-native"
+import { FlatList } from "react-native-gesture-handler"
 import { ImageContext } from "../store/ContextProvider"
 import GridTileImage from "./GridTileImage"
 
@@ -20,12 +21,14 @@ function FlatListImage({ resetScroll }) {
     }
 
     return (
-        <FlatList
-            data={appContext.imageList}
-            keyExtractor={(item) => item.uri}
-            renderItem={renderGridTileImage}
-            numColumns={3}
-        />
+        <SafeAreaView style={styles.container}>
+            <FlatList
+                data={appContext.imageList}
+                keyExtractor={(item) => item.uri}
+                renderItem={renderGridTileImage}
+                numColumns={3}
+            />
+        </SafeAreaView>
     )
 }
 
@@ -34,6 +37,7 @@ export default FlatListImage
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // backgroundColor: "red"
-    },
+        marginBottom: 75
+        // backgroundColor: "red",
+    }
 })

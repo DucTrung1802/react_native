@@ -16,4 +16,4 @@ export const GlobalStyles = {
     },
 };
 
-export const MAX_IMAGE_STORE = 12
+export const MAX_IMAGE_STORE = 18
