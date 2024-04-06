@@ -85,7 +85,7 @@ function PhotoSelectionContainer({ resetScroll }) {
     async function ClipboardHandler() {
         appContext.setDisableClipboardButton(true)
         let photo = await Clipboard.getImageAsync({})
-        if (photo.data && photo.size.height > 0 && photo.size.width > 0) {
+        if (photo && photo.data && photo.size.height > 0 && photo.size.width > 0) {
             var newPhoto = {
                 uri: photo.data,
                 size: {
@@ -117,22 +117,29 @@ function PhotoSelectionContainer({ resetScroll }) {
                     icon={<Feather name="camera" size={24} color="white" />}
                     text="Camera"
                     onPress={StartCameraHandler}
+                    buttonStyle={styles.button}
+                    buttonTextStyle={styles.buttonText}
                 />
                 <CustomButton
                     icon={<FontAwesome name="image" size={24} color="white" />}
                     text="Gallery"
                     onPress={OpenGalleryHandler}
+                    buttonStyle={styles.button}
+                    buttonTextStyle={styles.buttonText}
                 />
                 <CustomButton
                     icon={<Feather name="folder" size={24} color="white" />}
                     text="Files"
                     onPress={OpenFileHandler}
+                    buttonStyle={styles.button}
+                    buttonTextStyle={styles.buttonText}
                 />
                 <CustomButton
                     icon={<Fontisto name="scissors" size={24} color="white" />}
                     text="Clipboard"
-                    onPress={ClipboardHandler}
-                    disabled={appContext.disableClipboardButton}
+                    onPress={appContext.disableClipboardButton ? () => { } : ClipboardHandler}
+                    buttonStyle={{ ...styles.button, opacity: appContext.disableClipboardButton ? 0.4 : 1 }}
+                    buttonTextStyle={styles.buttonText}
                 />
             </View>
             <View style={styles.photoGridContainer}>
@@ -191,5 +198,18 @@ const styles = StyleSheet.create({
     photoGridContainer: {
         flex: 7,
         backgroundColor: GlobalStyles.colors.primary200
+    },
+    button: {
+        flex: 1,
+        backgroundColor: GlobalStyles.colors.primary700,
+        marginVertical: "4%",
+        marginHorizontal: "2%",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 5,
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
     }
 })
