@@ -16,6 +16,7 @@ import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
 import { getIpConfigureUrl, postImageToServer } from '../backend/http';
+import { sha256 } from 'js-sha256'
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -126,7 +127,8 @@ function ImagePickerScreen({ navigation }) {
     };
 
     async function generateButtonHandler() {
-        await postImageToServer("HELLO FROM EXPO")
+        let image = await postImageToServer("HELLO FROM EXPO")
+        console.log(image)
     }
 
     return (
