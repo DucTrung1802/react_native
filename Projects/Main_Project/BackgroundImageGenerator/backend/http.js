@@ -1,8 +1,14 @@
 import axios from "axios";
 
-const BACKEND_URL = "http://127.0.0.1:8000/"
+const IP_CONFIGURE_URL = "https://raw.githubusercontent.com/DucTrung1802/gcp_ip/main/gcp_ip.json"
 
-export async function getString() {
-    const response = await axios.get(BACKEND_URL)
-    console.log(response)
+export async function getIpConfigureUrl() {
+    const response = await axios.get(IP_CONFIGURE_URL)
+    return response.data.ip
+}
+
+export async function postImageToServer(image) {
+    let backend_ip = await axios.get(IP_CONFIGURE_URL)
+    const response = await axios.post(backend_ip + "/post_image", image)
+    return response
 }

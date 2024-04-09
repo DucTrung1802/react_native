@@ -15,6 +15,7 @@ import {
 import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
+import { getIpConfigureUrl, postImageToServer } from '../backend/http';
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -124,8 +125,8 @@ function ImagePickerScreen({ navigation }) {
         Keyboard.dismiss(); // Dismiss the keyboard
     };
 
-    function generateButtonHandler() {
-        console.log(text)
+    async function generateButtonHandler() {
+        await postImageToServer("HELLO FROM EXPO")
     }
 
     return (
