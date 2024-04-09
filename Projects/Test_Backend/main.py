@@ -8,9 +8,13 @@ base_url = "https://dummyjson.com/carts"
 
 @app.get("/")
 async def root():
-    response = requests.get(base_url)
-    results = response.json()
-    return results
+    # response = requests.get("")
+    # results = response.json()
+    return "HELLO CLIENT"
+
+@app.post("/post_image")
+async def receive_image(request):
+    print(request)
 
 
 def main():
