@@ -11,6 +11,6 @@ export async function getIpConfigureUrl() {
 export async function postImageToServer(image) {
     let backend_ip = await axios.get(IP_CONFIGURE_URL)
     let backend_ip_hash = sha256(backend_ip)
-    const response = await axios.post(backend_ip + "/post_image", { image: image }, { headers: { "Authorization": `BIG ${backend_ip_hash}` } })
+    const response = await axios.post(backend_ip + "/post_image", { jwt: backend_ip_hash, image: image },)
     return response
 }

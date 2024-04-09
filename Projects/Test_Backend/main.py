@@ -6,9 +6,9 @@ app = FastAPI()
 base_url = "https://dummyjson.com/carts"
 
 
-class UserCreate(BaseModel):
-    user_id: int
-    username: str
+class Request(BaseModel):
+    jwt: str
+    image: str
 
 
 @app.get("/")
@@ -19,13 +19,12 @@ async def root():
 
 
 @app.post("/post_image/")
-async def receive_image(user_data: UserCreate):
-    user_id = user_data.user_id
-    username = user_data.username
+async def receive_image(request: Request):
+    jwt = request.jwt
+    image = request.image
     return {
-        "msg": "we got data succesfully",
-        "user_id": user_id,
-        "username": username,
+        "jwt": jwt,
+        "image": image,
     }
 
 
