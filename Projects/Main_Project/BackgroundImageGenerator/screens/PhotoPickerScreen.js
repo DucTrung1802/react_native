@@ -127,7 +127,7 @@ function ImagePickerScreen({ navigation }) {
     };
 
     async function generateButtonHandler() {
-        let image = await postImageToServer("HELLO FROM EXPO")
+        let image = await postImageToServer(appContext.mainImage)
         console.log(image)
     }
 
