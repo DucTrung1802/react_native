@@ -21,10 +21,31 @@ async def root():
 
 
 @app.post("/post_request")
-async def receive_image(jwt: Annotated[str, Form()], image: Annotated[str, Form()]):
-    print(jwt)
-    print(image)
-    return {"hi": "hello"}
+async def receive_image(
+    token: Annotated[str, Form()],
+    prompt: Annotated[str, Form()],
+    img_file: Annotated[UploadFile, File()],
+):
+
+    print(img_file.content_type)
+    if (
+        ".jpg" in img_file.filename
+        or ".jpeg" in img_file.filename
+        or ".png" in img_file.filename
+    ):
+        file_save_path = "./images/" + img_file.filename
+        if os.path.exists("./images") == False:
+            os.makedirs("./images")
+
+        with open(file_save_path, "wb") as f:
+            f.write(img_file.file.read())
+
+        if os.path.exists(file_save_path):
+            return {"image_path": file_save_path, "message": "Image saved successfully"}
+        else:
+            return {"error": "Image Not saved !!!"}
+    else:
+        return {"error": "File Type is not valid please upload only jpg,jpeg and png"}
 
 
 @app.post("/upload_image")

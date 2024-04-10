@@ -11,6 +11,7 @@ export const ImageContext = createContext({
             width: 0
         }
     },
+    prompt: "",
     imageList: [],
     setDisableClipboardButton: (value) => { },
     setImageInClipboard: (imageInClipboard) => { },
