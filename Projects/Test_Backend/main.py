@@ -1,16 +1,16 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 import uvicorn
 from pydantic import BaseModel
-import time
 import os
+from typing import Annotated
 
 app = FastAPI()
 base_url = "https://dummyjson.com/carts"
 
 
 class Request(BaseModel):
-    jwt: str
-    image: str
+    jwt: Annotated[str, Form()]
+    image: Annotated[str, Form()]
 
 
 @app.get("/")
@@ -20,15 +20,11 @@ async def root():
     return "HELLO CLIENT"
 
 
-@app.post("/post_image")
-async def receive_image(request: Request):
-    jwt = request.jwt
-    image = request.image
-    time.sleep(3)
-    return {
-        "jwt": jwt,
-        "image": image,
-    }
+@app.post("/post_request")
+async def receive_image(jwt: Annotated[str, Form()], image: Annotated[str, Form()]):
+    print(jwt)
+    print(image)
+    return {"hi": "hello"}
 
 
 @app.post("/upload_image")
