@@ -1,6 +1,12 @@
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, BackHandler } from "react-native"
+import React, { useEffect } from 'react';
 
 function PhotoFullScreen() {
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true)
+        return () => backHandler.remove()
+    }, [])
+
     return (
         <View style={styles.container}>
             <Text>PhotoFullScreen</Text>

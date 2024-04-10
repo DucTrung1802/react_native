@@ -6,7 +6,7 @@ import { StyleSheet } from 'react-native';
 import { GlobalStyles } from './constants/styles';
 
 import ImagePickerScreen from './screens/PhotoPickerScreen';
-import PhotoFullScreen from './screens/PhotoFullScreen';
+import AppLoadingScreen from './screens/AppLoadingScreen';
 import ContextProvider from './store/ContextProvider';
 
 SplashScreen.preventAutoHideAsync();
@@ -34,8 +34,8 @@ export default function App() {
                                 title: "Photo Picker Screen",
                             }} />
                         <Stack.Screen
-                            name="PhotoFullScreen"
-                            component={PhotoFullScreen}
+                            name="AppLoadingScreen"
+                            component={AppLoadingScreen}
                             options={{
                                 headerShown: false,
                             }} />

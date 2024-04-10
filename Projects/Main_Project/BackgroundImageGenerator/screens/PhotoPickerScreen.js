@@ -135,7 +135,8 @@ function ImagePickerScreen({ navigation }) {
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <View style={styles.container}>
                     <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 2.2 : 6 }}>
-                        <TouchableWithoutFeedback onPress={handlePressOutside}>
+                        {/* <TouchableWithoutFeedback onPress={handlePressOutside}> */}
+                        <TouchableWithoutFeedback onPress={() => { navigation.navigate("AppLoadingScreen") }}>
                             <Image
                                 style={styles.imagePreview}
                                 source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
