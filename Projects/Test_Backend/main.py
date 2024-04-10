@@ -26,7 +26,8 @@ async def receive_image(
     prompt: Annotated[str, Form()],
     img_file: Annotated[UploadFile, File()],
 ):
-
+    print("token: " + token)
+    print("prompt: " + prompt)
     print(img_file.content_type)
     if (
         ".jpg" in img_file.filename

@@ -30,26 +30,27 @@ export async function postImageToServer(image, prompt) {
         responseErrorHandler()
     }
 
-    
-
-    const backend_ip = String(response.data.ip)
     // Initialize FormData
     const formData = new FormData();
 
+    const backend_ip = String(response.data.ip)
+
     // Get token
     const token = sha256(backend_ip)
-    formData.append("token", token)
 
-    formData.append("image", {
+    const extension = image.uri.split('.').pop().toLowerCase();
+    const imgType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
+    const imgName = "input_image_" + String(Date.now()) + "." + extension
+
+    formData.append("token", token)
+    formData.append("prompt", prompt.trim())
+    formData.append("img_file", {
         uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
-        type: 'image/jpeg',
-        name: 'image.jpg',
+        type: imgType,
+        name: imgName,
     })
 
-
     response = await axios.get(backend_ip)
-    // console.log(response.data)
     response = await axios.post(backend_ip + API_ROUTE, formData, { headers: { "Content-Type": "multipart/form-data", }, })
-    // console.log(response.data)
     return response
 }

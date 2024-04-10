@@ -4,7 +4,7 @@ import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
 import {
     AppState, StyleSheet, Text, View,
-    TouchableOpacity, Image, Alert, ScrollView,
+    Image, Alert, ScrollView,
     TouchableWithoutFeedback, Keyboard
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
@@ -15,8 +15,8 @@ import {
 import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
-import { getIpConfigureUrl, postImageToServer } from '../backend/http';
-import { sha256 } from 'js-sha256'
+import { postImageToServer } from '../backend/http';
+import AppLoadingScreen from '../components/AppLoadingScreen';
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -27,7 +27,7 @@ function ImagePickerScreen({ navigation }) {
     const [cameraPermissionInformation, requestPermission] =
         useCameraPermissions();
 
-    const [text, setChangeText] = useState("");
+    const [inputPrompt, setInputPrompt] = useState("");
 
     useEffect(() => {
         // Add event listener when component mounts
@@ -41,7 +41,7 @@ function ImagePickerScreen({ navigation }) {
 
     function onChangeTextHandler(value) {
         value.replace("\n", "")
-        setChangeText(value)
+        setInputPrompt(value)
     }
 
     const handleAppStateChange = async (nextAppState) => {
@@ -127,8 +127,7 @@ function ImagePickerScreen({ navigation }) {
     };
 
     async function generateButtonHandler() {
-        let image = await postImageToServer(appContext.mainImage, appContext.prompt)
-        // console.log(image)
+        const response = await postImageToServer(appContext.mainImage, inputPrompt)
     }
 
     return (
@@ -156,7 +155,7 @@ function ImagePickerScreen({ navigation }) {
                                     numberOfLines={4}
                                     maxLength={150}
                                     placeholder="Enter your prompt here..."
-                                    value={text}
+                                    value={inputPrompt}
                                     placeholderTextColor="#b3b3b3"
                                     onChangeText={text => onChangeTextHandler(text)}
                                     style={styles.textInput}
