@@ -33,7 +33,6 @@ async def receive_image(request: Request):
 
 @app.post("/upload_image")
 async def upload_image(img_file: UploadFile = File(...)):
-
     if (
         ".jpg" in img_file.filename
         or ".jpeg" in img_file.filename
