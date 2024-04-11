@@ -1,9 +1,9 @@
 import { StyleSheet, TouchableOpacity, Text } from "react-native";
 import { GlobalStyles } from "../constants/styles";
 
-function CustomButton({ icon, text, onPress, buttonStyle, buttonTextStyle }) {
+function CustomButton({ icon, text, onPress, buttonStyle, buttonTextStyle, disabled }) {
     return (
-        <TouchableOpacity style={{ ...buttonStyle }} onPress={onPress} >
+        <TouchableOpacity style={{ ...buttonStyle }} onPress={onPress} disabled={disabled}>
             {icon}
             <Text style={{ ...buttonTextStyle }}>{text}</Text>
         </TouchableOpacity>

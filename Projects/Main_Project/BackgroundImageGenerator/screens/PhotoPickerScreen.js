@@ -152,8 +152,7 @@ function PhotoPickerScreen({ navigation }) {
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <View style={styles.container}>
                         <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 2.2 : 6 }}>
-                            {/* <TouchableWithoutFeedback onPress={handlePressOutside}> */}
-                            <TouchableWithoutFeedback onPress={() => { }}>
+                            <TouchableWithoutFeedback onPress={handlePressOutside}>
                                 <Image
                                     style={styles.imagePreview}
                                     source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
@@ -183,8 +182,9 @@ function PhotoPickerScreen({ navigation }) {
                                 {appContext.mainImage.uri && <CustomButton
                                     text={"Generate Background"}
                                     onPress={generateButtonHandler}
-                                    buttonStyle={styles.generateButton}
+                                    buttonStyle={{ ...styles.generateButton, opacity: inputPrompt.length ? 1 : 0.4 }}
                                     buttonTextStyle={styles.buttonText}
+                                    disabled={!inputPrompt.length}
                                 />}
                                 <CustomButton
                                     text={"+ Choose a Photo"}
@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
         height: 50,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.error500,
-        opacity: 1,
         marginVertical: 10
     },
     buttonText: {
