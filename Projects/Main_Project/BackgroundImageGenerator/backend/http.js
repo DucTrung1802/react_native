@@ -13,7 +13,7 @@ export async function getIpConfigureUrl() {
 }
 
 function responseErrorHandler() {
-    console.log("ERROR")
+    console.log("http.js ERROR")
 }
 
 export async function postImageToServer(image, prompt) {

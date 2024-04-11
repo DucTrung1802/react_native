@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 
-const AppLoadingScreen = () => {
+const AppLoadingView = () => {
     const [countdown, setCountdown] = useState(5);
     const [loading, setLoading] = useState(true);
 

@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet } from 'react-native';
 import { GlobalStyles } from './constants/styles';
 
-import ImagePickerScreen from './screens/PhotoPickerScreen';
+import PhotoPickerScreen from './screens/PhotoPickerScreen';
 import AppLoadingScreen from './screens/AppLoadingScreen';
 import ContextProvider from './store/ContextProvider';
 
@@ -28,7 +28,7 @@ export default function App() {
                     >
                         <Stack.Screen
                             name="PhotoPickerScreen"
-                            component={ImagePickerScreen}
+                            component={PhotoPickerScreen}
                             options={{
                                 headerShown: true,
                                 title: "Photo Picker Screen",

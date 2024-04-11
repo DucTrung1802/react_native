@@ -18,8 +18,9 @@ import CustomButton from "../components/CustomButton";
 import { postImageToServer } from '../backend/http';
 import OverlayView from '../components/OverlayView';
 
-function ImagePickerScreen({ navigation }) {
+function PhotoPickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
+    const [isGenerating, setIsGenerating] = useState(false)
 
     const imagePlaceholder = require('../assets/image_placeholder.png')
     const ref = useRef(null);
@@ -129,9 +130,21 @@ function ImagePickerScreen({ navigation }) {
         Keyboard.dismiss(); // Dismiss the keyboard
     };
 
-    async function generateButtonHandler() {
-        const response = await postImageToServer(appContext.mainImage, inputPrompt)
+    function setIsGeneratingHandler(value) {
+        setIsGenerating(value)
     }
+
+    async function generateButtonHandler() {
+        let response;
+        setIsGeneratingHandler(true);
+        while (!response) {
+            response = await postImageToServer(appContext.mainImage, inputPrompt);
+        }
+        setIsGeneratingHandler(false);
+
+        // Post-process response
+    }
+
 
     return (
         <>
@@ -187,12 +200,12 @@ function ImagePickerScreen({ navigation }) {
                     </View >
                 </GestureHandlerRootView >
             </TouchableWithoutFeedback>
-            <OverlayView onPress={() => { }} />
+            {isGenerating && <OverlayView onPress={() => { setIsGeneratingHandler(false) }} />}
         </>
     )
 }
 
-export default ImagePickerScreen;
+export default PhotoPickerScreen;
 
 const styles = StyleSheet.create({
     container: {

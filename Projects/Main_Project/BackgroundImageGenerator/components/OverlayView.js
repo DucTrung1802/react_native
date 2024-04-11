@@ -10,15 +10,6 @@ function OverlayView({ onPress }) {
         const interval = setInterval(() => {
             setCountdown((prevCountdown) => prevCountdown - 1);
         }, 1000);
-
-        // Simulate async response (replace with your actual async function)
-        setTimeout(() => {
-            clearInterval(interval);
-        }, IMAGE_GENERATION_TIMEOUT * 1000);
-
-        return () => {
-            clearInterval(interval);
-        };
     }, []);
 
     return (
@@ -28,7 +19,6 @@ function OverlayView({ onPress }) {
                 <Text style={styles.waitingText}>Waiting for image generation!</Text>
             </View>
             <TouchableOpacity onPress={onPress} style={{ ...styles.overlayButton, opacity: countdown > 0 ? 0.4 : 1 }} disabled={countdown > 0}>
-                {/* <Text style={styles.buttonText}>Cancel</Text> */}
                 <Text style={styles.buttonText}>{countdown > 0 ? countdown : "Cancel"}</Text>
             </TouchableOpacity>
         </View>
@@ -46,7 +36,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)', // Transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0.8)', // Transparent background
     },
     overlayContent: {
         // backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white
