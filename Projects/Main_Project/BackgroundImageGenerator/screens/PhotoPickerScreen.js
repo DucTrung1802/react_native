@@ -15,7 +15,6 @@ import {
 import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
-import { postImageToServer } from '../backend/http';
 import OverlayView from '../components/OverlayView';
 
 function PhotoPickerScreen({ navigation }) {
@@ -143,6 +142,7 @@ function PhotoPickerScreen({ navigation }) {
         setIsGeneratingHandler(false);
 
         // Post-process response
+        console.log(response)
     }
 
 
