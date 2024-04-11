@@ -16,6 +16,8 @@ import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
 import OverlayView from '../components/OverlayView';
+import * as FileSystem from 'expo-file-system';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 function PhotoPickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -133,16 +135,53 @@ function PhotoPickerScreen({ navigation }) {
         setIsGenerating(value)
     }
 
-    async function generateButtonHandler() {
-        let response;
-        setIsGeneratingHandler(true);
-        while (!response) {
-            response = await postImageToServer(appContext.mainImage, inputPrompt);
+    const requestFileWritePermission = async () => {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        console.log(permissions.granted);
+        if (!permissions.granted) {
+            Alert.alert('Error', 'File Permissions Denied')
+            return {
+                access: false,
+                directoryUri: null
+            };
         }
-        setIsGeneratingHandler(false);
+        return {
+            access: true,
+            directoryUri: permissions.directoryUri
+        };
+    }
 
-        // Post-process response
-        console.log(response)
+    // const hasPermissions = await requestFileWritePermission();
+    // if (hasPermissions.access) {
+    //     await saveReportFile(pdfData, hasPermissions.directoryUri)
+    // }
+
+    async function generateButtonHandler() {
+        // let response;
+        // setIsGeneratingHandler(true);
+        // while (!response) {
+        //     response = await postImageToServer(appContext.mainImage, inputPrompt);
+        // }
+        // setIsGeneratingHandler(false);
+
+        // // Post-process response
+        // console.log(response)
+
+        // https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg
+        FileSystem.downloadAsync(
+            'https://fujifilm-x.com/wp-content/uploads/2021/01/gfx100s_sample_04_thum-1.jpg',
+            FileSystem.documentDirectory + "new_image_" + String(Date.now()) + ".jpg",
+        )
+            .then(({ uri }) => {
+                console.log('Finished downloading to ', uri);
+                var newPhoto = {
+                    uri: uri,
+                }
+                appContext.setMainImage(newPhoto)
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }
 
 
