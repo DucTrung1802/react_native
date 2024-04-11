@@ -44,7 +44,7 @@ function PhotoPickerScreen({ navigation }) {
     }, []);
 
     function onChangeTextHandler(value) {
-        value.replace("\n", "")
+        value = value.replace("\n", "")
         setInputPrompt(value)
     }
 
