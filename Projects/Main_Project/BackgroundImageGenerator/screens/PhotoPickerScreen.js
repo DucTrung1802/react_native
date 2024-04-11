@@ -16,7 +16,7 @@ import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
 import { postImageToServer } from '../backend/http';
-import AppLoadingScreen from '../components/AppLoadingScreen';
+import OverlayView from '../components/OverlayView';
 
 function ImagePickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -35,7 +35,10 @@ function ImagePickerScreen({ navigation }) {
 
         // Remove event listener when component unmounts
         return () => {
-            // AppState.removeEventListener("change", handleAppStateChange);
+            try {
+                AppState.removeEventListener("change", handleAppStateChange);
+            }
+            catch (ex) { }
         };
     }, []);
 
@@ -131,58 +134,61 @@ function ImagePickerScreen({ navigation }) {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={handlePressOutside}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-                <View style={styles.container}>
-                    <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 2.2 : 6 }}>
-                        {/* <TouchableWithoutFeedback onPress={handlePressOutside}> */}
-                        <TouchableWithoutFeedback onPress={() => { navigation.navigate("AppLoadingScreen") }}>
-                            <Image
-                                style={styles.imagePreview}
-                                source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
-                            />
-                        </TouchableWithoutFeedback>
-                    </View>
-                    {appContext.mainImage.uri && <View style={styles.titleContainer}>
-                        <Text style={styles.title}>Prompt</Text>
-                    </View>}
-                    <View style={styles.interactContainer}>
-                        <ScrollView>
-                            {appContext.mainImage.uri && <View style={styles.textInputContainer}>
-                                <TextInput
-                                    editable
-                                    multiline
-                                    textAlignVertical='top'
-                                    numberOfLines={4}
-                                    maxLength={150}
-                                    placeholder="Enter your prompt here..."
-                                    value={inputPrompt}
-                                    placeholderTextColor="#b3b3b3"
-                                    onChangeText={text => onChangeTextHandler(text)}
-                                    style={styles.textInput}
-                                    keyboardType="default"
+        <>
+            <TouchableWithoutFeedback onPress={handlePressOutside}>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    <View style={styles.container}>
+                        <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 2.2 : 6 }}>
+                            {/* <TouchableWithoutFeedback onPress={handlePressOutside}> */}
+                            <TouchableWithoutFeedback onPress={() => { }}>
+                                <Image
+                                    style={styles.imagePreview}
+                                    source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
                                 />
-                            </View>}
-                            {appContext.mainImage.uri && <CustomButton
-                                text={"Generate Background"}
-                                onPress={generateButtonHandler}
-                                buttonStyle={styles.generateButton}
-                                buttonTextStyle={styles.buttonText}
-                            />}
-                            <CustomButton
-                                text={"+ Choose a Photo"}
-                                onPress={startFromPhotoHandler}
-                                buttonStyle={styles.chooseButton}
-                                buttonTextStyle={styles.buttonText}
-                            />
-                        </ScrollView>
-                    </View>
-                    <BottomSheet ref={ref} >
-                        <PhotoSelectionContainer resetScroll={resetScrollHandler} />
-                    </BottomSheet>
-                </View >
-            </GestureHandlerRootView >
-        </TouchableWithoutFeedback>
+                            </TouchableWithoutFeedback>
+                        </View>
+                        {appContext.mainImage.uri && <View style={styles.titleContainer}>
+                            <Text style={styles.title}>Prompt</Text>
+                        </View>}
+                        <View style={styles.interactContainer}>
+                            <ScrollView>
+                                {appContext.mainImage.uri && <View style={styles.textInputContainer}>
+                                    <TextInput
+                                        editable
+                                        multiline
+                                        textAlignVertical='top'
+                                        numberOfLines={4}
+                                        maxLength={150}
+                                        placeholder="Enter your prompt here..."
+                                        value={inputPrompt}
+                                        placeholderTextColor="#b3b3b3"
+                                        onChangeText={text => onChangeTextHandler(text)}
+                                        style={styles.textInput}
+                                        keyboardType="default"
+                                    />
+                                </View>}
+                                {appContext.mainImage.uri && <CustomButton
+                                    text={"Generate Background"}
+                                    onPress={generateButtonHandler}
+                                    buttonStyle={styles.generateButton}
+                                    buttonTextStyle={styles.buttonText}
+                                />}
+                                <CustomButton
+                                    text={"+ Choose a Photo"}
+                                    onPress={startFromPhotoHandler}
+                                    buttonStyle={styles.chooseButton}
+                                    buttonTextStyle={styles.buttonText}
+                                />
+                            </ScrollView>
+                        </View>
+                        <BottomSheet ref={ref} >
+                            <PhotoSelectionContainer resetScroll={resetScrollHandler} />
+                        </BottomSheet>
+                    </View >
+                </GestureHandlerRootView >
+            </TouchableWithoutFeedback>
+            <OverlayView onPress={() => { }} />
+        </>
     )
 }
 
