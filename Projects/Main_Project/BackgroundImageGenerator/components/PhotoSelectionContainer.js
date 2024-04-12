@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Image } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, Image, Alert } from "react-native";
 import { GlobalStyles } from "../constants/styles";
 import CustomButton from "./CustomButton";
 import * as ImagePicker from 'expo-image-picker';
@@ -16,7 +16,30 @@ import { Fontisto } from '@expo/vector-icons';
 function PhotoSelectionContainer({ resetScroll }) {
     const appContext = useContext(ImageContext)
 
+    const [mediaLibraryPermission, requestMediaLibraryPermission] =
+        ImagePicker.useMediaLibraryPermissions();
+
+    async function verifyMediaLibraryPermissions() {
+        const responsePermission = await requestMediaLibraryPermission();
+
+        if (!responsePermission.granted) {
+            Alert.alert(
+                'Insufficient Permissions!',
+                'You need to grant media library permissions to use this app.'
+            );
+            return false;
+        }
+
+        return true;
+    }
+
     async function StartCameraHandler() {
+        const hasPermission = await verifyMediaLibraryPermissions();
+
+        if (!hasPermission) {
+            return;
+        }
+
         const photo = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
             aspect: [1, 1],
@@ -26,10 +49,7 @@ function PhotoSelectionContainer({ resetScroll }) {
         if (!photo.canceled) {
             var newPhoto = {
                 uri: photo.assets[0].uri,
-                size: {
-                    height: photo.assets[0].height,
-                    width: photo.assets[0].width
-                }
+                canBeSave: false
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
@@ -47,10 +67,7 @@ function PhotoSelectionContainer({ resetScroll }) {
         if (!photo.canceled) {
             var newPhoto = {
                 uri: photo.assets[0].uri,
-                size: {
-                    height: photo.assets[0].height,
-                    width: photo.assets[0].width
-                }
+                canBeSave: false
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
@@ -69,10 +86,7 @@ function PhotoSelectionContainer({ resetScroll }) {
             Image.getSize(imageUri, async (width, height) => {
                 var newPhoto = {
                     uri: imageUri,
-                    size: {
-                        height: height,
-                        width: width
-                    }
+                    canBeSave: false
                 }
                 await appContext.setMainImageAndAdd(newPhoto)
                 resetScroll()
@@ -88,10 +102,7 @@ function PhotoSelectionContainer({ resetScroll }) {
         if (photo && photo.data && photo.size.height > 0 && photo.size.width > 0) {
             var newPhoto = {
                 uri: photo.data,
-                size: {
-                    height: photo.size.height,
-                    width: photo.size.width
-                }
+                canBeSave: false
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()

@@ -6,10 +6,7 @@ export const ImageContext = createContext({
     imageInClipboard: null,
     mainImage: {
         uri: null,
-        size: {
-            height: 0,
-            width: 0
-        }
+        canBeSave: false
     },
     imageList: [],
     setDisableClipboardButton: (value) => { },

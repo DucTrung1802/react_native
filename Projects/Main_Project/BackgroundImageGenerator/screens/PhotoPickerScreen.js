@@ -17,7 +17,8 @@ import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
 import OverlayView from '../components/OverlayView';
 import * as FileSystem from 'expo-file-system';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import * as MediaLibrary from 'expo-media-library';
+import { postImageToServer } from "../backend/http"
 
 function PhotoPickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -26,8 +27,10 @@ function PhotoPickerScreen({ navigation }) {
     const imagePlaceholder = require('../assets/image_placeholder.png')
     const ref = useRef(null);
 
-    const [cameraPermissionInformation, requestPermission] =
+    const [cameraPermission, requestCameraPermission] =
         useCameraPermissions();
+
+    const [mediaLibraryPermission, requestMediaLibraryPermission] = MediaLibrary.usePermissions()
 
     const [inputPrompt, setInputPrompt] = useState("");
 
@@ -64,25 +67,37 @@ function PhotoPickerScreen({ navigation }) {
 
     const handleAppForeground = () => {
         // Add your code to execute when the app is in the foreground
-        console.log("App is in the foreground");
+        // console.log("App is in the foreground");
+        // console.log("");
     };
 
     const handleAppBackground = () => {
         // Add your code to execute when the app is in the background
-        console.log("App is in the background");
+        // console.log("App is in the background");
+        // console.log("");
     };
 
-    async function verifyPermissions() {
-        if (cameraPermissionInformation.status === PermissionStatus.UNDETERMINED) {
-            const permissionResponse = await requestPermission();
+    async function verifyCameraPermissions() {
+        const responsePermission = await requestCameraPermission();
 
-            return permissionResponse.granted;
-        }
-
-        if (cameraPermissionInformation.status === PermissionStatus.DENIED) {
+        if (!responsePermission.granted) {
             Alert.alert(
                 'Insufficient Permissions!',
                 'You need to grant camera permissions to use this app.'
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    async function verifyMediaLibraryPermissions() {
+        const responsePermission = await requestMediaLibraryPermission();
+
+        if (!responsePermission.granted) {
+            Alert.alert(
+                'Insufficient Permissions!',
+                'You need to grant media library permissions to use this app.'
             );
             return false;
         }
@@ -104,8 +119,9 @@ function PhotoPickerScreen({ navigation }) {
         }
     }
 
-    async function startFromPhotoHandler() {
-        const hasPermission = await verifyPermissions();
+    async function chooseAPhotoHandler() {
+        const hasPermission = await verifyCameraPermissions();
+        console.log(hasPermission)
 
         if (!hasPermission) {
             return;
@@ -120,6 +136,7 @@ function PhotoPickerScreen({ navigation }) {
             ref?.current?.scrollTo(-400);
         }
     }
+
     const resetScrollHandler = useCallback(() => {
         const isActive = ref?.current?.isActive();
         if (isActive) {
@@ -135,62 +152,58 @@ function PhotoPickerScreen({ navigation }) {
         setIsGenerating(value)
     }
 
-    const requestFileWritePermission = async () => {
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        console.log(permissions.granted);
-        if (!permissions.granted) {
-            Alert.alert('Error', 'File Permissions Denied')
-            return {
-                access: false,
-                directoryUri: null
-            };
-        }
-        return {
-            access: true,
-            directoryUri: permissions.directoryUri
-        };
-    }
-
-    // const hasPermissions = await requestFileWritePermission();
-    // if (hasPermissions.access) {
-    //     await saveReportFile(pdfData, hasPermissions.directoryUri)
-    // }
-
     async function generateButtonHandler() {
-        // let response;
-        // setIsGeneratingHandler(true);
-        // while (!response) {
-        //     response = await postImageToServer(appContext.mainImage, inputPrompt);
-        // }
-        // setIsGeneratingHandler(false);
+        var response;
+        setIsGeneratingHandler(true);
+        while (!response) {
+            response = await postImageToServer(appContext.mainImage, inputPrompt);
+        }
+        setIsGeneratingHandler(false);
 
-        // // Post-process response
-        // console.log(response)
+        // Post-process response
+        console.log(response.data._data.blobId)
 
         // https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg
-        FileSystem.downloadAsync(
-            'https://fujifilm-x.com/wp-content/uploads/2021/01/gfx100s_sample_04_thum-1.jpg',
-            FileSystem.documentDirectory + "new_image_" + String(Date.now()) + ".jpg",
-        )
-            .then(({ uri }) => {
-                console.log('Finished downloading to ', uri);
-                var newPhoto = {
-                    uri: uri,
-                }
-                appContext.setMainImage(newPhoto)
-            })
-            .catch(error => {
-                console.error(error);
-            });
+        // const downloadResponse = await FileSystem.downloadAsync(
+        //     'https://fujifilm-x.com/wp-content/uploads/2021/01/gfx100s_sample_04_thum-1.jpg',
+        //     FileSystem.documentDirectory + "new_image_" + String(Date.now()) + ".jpg",
+        // )
+
+        // if (downloadResponse && downloadResponse.uri) {
+        //     var newPhoto = {
+        //         uri: downloadResponse.uri,
+        //         canBeSave: true,
+        //     }
+
+        //     appContext.setMainImage(newPhoto)
+        // }
+
     }
 
+    async function saveImageHandler() {
+        //     const hasPermission = await verifyMediaLibraryPermissions();
+
+        //     console.log("hasPermission:", hasPermission)
+
+        //     if (!hasPermission) {
+        //         return;
+        //     }
+
+        //     await MediaLibrary.saveToLibraryAsync(uri)
+
+        //     appContext.setMainImage(newPhoto)
+        // })
+        // .catch(error => {
+        //     console.error(error);
+        // });
+    }
 
     return (
         <>
             <TouchableWithoutFeedback onPress={handlePressOutside}>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <View style={styles.container}>
-                        <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 2.2 : 6 }}>
+                        <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 1.6 : 6 }}>
                             <TouchableWithoutFeedback onPress={handlePressOutside}>
                                 <Image
                                     style={styles.imagePreview}
@@ -225,9 +238,16 @@ function PhotoPickerScreen({ navigation }) {
                                     buttonTextStyle={styles.buttonText}
                                     disabled={!inputPrompt.length}
                                 />}
+                                {appContext.mainImage.uri && <CustomButton
+                                    text={"Save Image"}
+                                    onPress={generateButtonHandler}
+                                    buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.canBeSave ? 1 : 0.4 }}
+                                    buttonTextStyle={styles.buttonText}
+                                    disabled={!inputPrompt.length}
+                                />}
                                 <CustomButton
                                     text={"+ Choose a Photo"}
-                                    onPress={startFromPhotoHandler}
+                                    onPress={chooseAPhotoHandler}
                                     buttonStyle={styles.chooseButton}
                                     buttonTextStyle={styles.buttonText}
                                 />
@@ -254,15 +274,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     imagePreviewContainer: {
-        flex: 2.2,
+        flex: 1.5,
         alignContent: 'center',
         justifyContent: "top",
         padding: 15,
         // backgroundColor: 'green'
     },
     imagePreview: {
-        height: 350,
-        width: 350,
+        height: 300,
+        width: 300,
         borderRadius: 10,
     },
     titleContainer: {
@@ -310,7 +330,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 50,
         borderRadius: 10,
-        backgroundColor: GlobalStyles.colors.error500,
+        backgroundColor: GlobalStyles.colors.red500,
+        marginVertical: 10
+    },
+    saveImageButton: {
+        marginHorizontal: "10%",
+        justifyContent: "center",
+        alignItems: 'center',
+        height: 50,
+        borderRadius: 10,
+        backgroundColor: GlobalStyles.colors.accent500,
         marginVertical: 10
     },
     buttonText: {
