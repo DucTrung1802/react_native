@@ -160,7 +160,7 @@ function PhotoPickerScreen({ navigation }) {
         setIsGeneratingHandler(false);
 
         // Post-process response
-        console.log(response)
+        // console.log(response)
 
         if (response && response.data) {
             var newPhoto = {
@@ -173,21 +173,32 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function saveImageHandler() {
-        //     const hasPermission = await verifyMediaLibraryPermissions();
+        const hasPermission = await verifyMediaLibraryPermissions();
 
-        //     console.log("hasPermission:", hasPermission)
+        if (!hasPermission) {
+            return;
+        }
 
-        //     if (!hasPermission) {
-        //         return;
-        //     }
+        try {
+            const base64ImageData = appContext.mainImage.uri.split(",")[1];
 
-        //     await MediaLibrary.saveToLibraryAsync(uri)
+            const fileUri = FileSystem.documentDirectory + 'image.png';
 
-        //     appContext.setMainImage(newPhoto)
-        // })
-        // .catch(error => {
-        //     console.error(error);
-        // });
+            await FileSystem.writeAsStringAsync(fileUri, base64ImageData, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            // Once the file is saved, you can save it to the media library
+            await MediaLibrary.createAssetAsync(fileUri);
+
+            Alert.alert(
+                'Successfully!',
+                'The image has been saved in your gallery.'
+            )
+
+        } catch (error) {
+            console.error('Error saving image:', error);
+        }
     }
 
     return (
