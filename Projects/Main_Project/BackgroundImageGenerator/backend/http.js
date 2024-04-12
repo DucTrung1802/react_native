@@ -51,6 +51,6 @@ export async function postImageToServer(image, prompt) {
     })
 
     response = await axios.get(backend_ip)
-    response = await axios.post(backend_ip + API_ROUTE, formData, { headers: { "Content-Type": "multipart/form-data", }, responseType: 'blob' })
+    response = await axios.post(backend_ip + API_ROUTE, formData, { headers: { "Content-Type": "multipart/form-data", } })
     return response
 }

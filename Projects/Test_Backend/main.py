@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import uvicorn
 from pydantic import BaseModel
 import os
@@ -15,7 +15,8 @@ from carvekit.trimap.generator import TrimapGenerator
 
 import requests
 import hashlib
-import asyncio
+
+import base64
 
 app = FastAPI()
 VALIDATE_TOKEN_URL = (
@@ -127,11 +128,15 @@ async def receive_image(
         return return_response_handler()
 
     print("Success")
-    return FileResponse(
-        output_image_path,
-        media_type="image/png",
-        filename=os.path.basename(output_image_path).split("/")[-1],
-    )
+
+    # Convert the image to base64 format
+    with open(output_image_path, "rb") as f:
+        encoded_image = base64.b64encode(f.read())
+
+    os.remove(input_image_path)
+    os.remove(output_image_path)
+
+    return encoded_image
 
 
 def main():

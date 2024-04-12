@@ -121,7 +121,6 @@ function PhotoPickerScreen({ navigation }) {
 
     async function chooseAPhotoHandler() {
         const hasPermission = await verifyCameraPermissions();
-        console.log(hasPermission)
 
         if (!hasPermission) {
             return;
@@ -161,23 +160,16 @@ function PhotoPickerScreen({ navigation }) {
         setIsGeneratingHandler(false);
 
         // Post-process response
-        console.log(response.data._data.blobId)
+        console.log(response)
 
-        // https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg
-        // const downloadResponse = await FileSystem.downloadAsync(
-        //     'https://fujifilm-x.com/wp-content/uploads/2021/01/gfx100s_sample_04_thum-1.jpg',
-        //     FileSystem.documentDirectory + "new_image_" + String(Date.now()) + ".jpg",
-        // )
+        if (response && response.data) {
+            var newPhoto = {
+                uri: `data:image/png;base64,${response.data}`,
+                canBeSave: true,
+            }
 
-        // if (downloadResponse && downloadResponse.uri) {
-        //     var newPhoto = {
-        //         uri: downloadResponse.uri,
-        //         canBeSave: true,
-        //     }
-
-        //     appContext.setMainImage(newPhoto)
-        // }
-
+            appContext.setMainImage(newPhoto)
+        }
     }
 
     async function saveImageHandler() {
@@ -240,7 +232,7 @@ function PhotoPickerScreen({ navigation }) {
                                 />}
                                 {appContext.mainImage.uri && <CustomButton
                                     text={"Save Image"}
-                                    onPress={generateButtonHandler}
+                                    onPress={saveImageHandler}
                                     buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.canBeSave ? 1 : 0.4 }}
                                     buttonTextStyle={styles.buttonText}
                                     disabled={!inputPrompt.length}
