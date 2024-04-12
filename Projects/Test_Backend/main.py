@@ -134,7 +134,6 @@ async def receive_image(
         encoded_image = base64.b64encode(f.read())
 
     os.remove(input_image_path)
-    os.remove(output_image_path)
 
     return encoded_image
 
