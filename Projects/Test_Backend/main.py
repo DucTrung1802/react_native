@@ -1,9 +1,11 @@
 from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import FileResponse, StreamingResponse
 import uvicorn
 from pydantic import BaseModel
 import os
 from typing import Annotated
+import numpy as np
+import cv2
+from diffusers.utils import load_image
 
 import PIL.Image
 from carvekit.api.interface import Interface
@@ -96,6 +98,14 @@ def return_response_handler():
     return False
 
 
+def get_mask(image_path) -> PIL.Image:
+    image = load_image(image_path)
+    bg = carvekit_processor([image])[0]
+    bg = np.array(bg)
+    mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
+    return mask_image
+
+
 @app.post("/post_request")
 async def receive_image(
     token: Annotated[str, Form()],
@@ -113,7 +123,10 @@ async def receive_image(
         return return_response_handler()
 
     # Validate image file
-    input_image_path: str = "./images/" + img_file.filename
+    image_name, image_extension = img_file.filename.split(".")
+
+    input_image_path: str = "./images/" + image_name + "." + image_extension
+    input_image_mask_path: str = "./images/" + image_name + "_mask." + image_extension
     if os.path.exists("./images") == False:
         os.makedirs("./images")
     with open(input_image_path, "wb") as f:
@@ -127,9 +140,11 @@ async def receive_image(
     if not os.path.exists(output_image_path):
         return return_response_handler()
 
-    print("Success")
+    # Generate mask
+    image_mask = get_mask(input_image_path)
+    image_mask.save(input_image_mask_path)
 
-    # Convert the image to base64 format
+    # Convert the image to base64 format for response
     with open(output_image_path, "rb") as f:
         encoded_image = base64.b64encode(f.read())
 
