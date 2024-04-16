@@ -17,13 +17,18 @@ from carvekit.trimap.generator import TrimapGenerator
 
 import requests
 import hashlib
+import json
+from io import BytesIO
 
 import base64
 
 app = FastAPI()
+
 VALIDATE_TOKEN_URL = (
     "https://raw.githubusercontent.com/DucTrung1802/gcp_ip/main/gcp_ip.json"
 )
+ENDPOINT_URL = "https://sb6zn2j49353q6uf.us-east-1.aws.endpoints.huggingface.cloud"
+HF_TOKEN = "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"
 
 seg_net = TracerUniversalB7(device="cpu", batch_size=1)
 
@@ -82,24 +87,55 @@ async def validate_token(token: str):
     return False
 
 
-def carvekit_processing(input_image_path):
+def return_response_handler():
+    print("return_response_handler()")
+    return False
+
+
+def carvekit_processing(input_image):
     try:
-        input_image = PIL.Image.open(input_image_path)
         rmbg_image = carvekit_processor([input_image])[0]
         return rmbg_image
     except:
         return False
 
 
-def return_response_handler():
-    print("return_response_handler()")
-    return False
-
-
-def get_mask(rmbg_image):
+def get_mask(input_image):
+    rmbg_image = carvekit_processing(input_image)
     bg = np.array(rmbg_image)
     mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
     return mask_image
+
+
+# helper image utils
+def encode_image(image):
+    return base64.b64encode(image.tobytes()).decode("utf-8")
+
+
+def predict(prompt, image, mask_image):
+    image = encode_image(image)
+    mask_image = encode_image(mask_image)
+
+    # prepare sample payload
+    request = {"inputs": prompt, "image": image, "mask_image": mask_image}
+    # headers
+    headers = {
+        "Authorization": f"Bearer {HF_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    response = requests.post(ENDPOINT_URL, headers=headers, json=request)
+
+    img_dict = json.loads(response.content.decode())
+    # images = []
+    # for img_str in img_dict.values():
+    #     base64_image = base64.b64decode(img_str)
+    #     buffer = BytesIO(base64_image)
+    #     image = PIL.Image.open(buffer)
+    #     images.append(image)
+
+    return img_dict
 
 
 @app.post("/post_request")
@@ -130,31 +166,23 @@ async def receive_image(
     if not os.path.exists(input_image_path):
         return return_response_handler()
 
-    # Generate background image (carvekit)
-    rmbg_image = carvekit_processing(input_image_path)
+    try:
+        input_image = PIL.Image.open(input_image_path)
 
-    # # Save rmbg_image (DEBUG)
-    # rmbg_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg" + ".png"
-    # rmbg_image.save(rmbg_image_path)
+        # Generate mask
+        image_mask = get_mask(input_image)
 
-    # Generate mask
-    image_mask = get_mask(rmbg_image)
+        # # Save image mask (DEBUG)
+        # image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
+        # image_mask.save(image_mask_path)
 
-    # # Save image mask (DEBUG)
-    # image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
-    # image_mask.save(image_mask_path)
+        output_base64_image_dictionary = predict(prompt, input_image, image_mask)
 
-    # Convert the image to base64 format for response
-    # with open(output_image_path, "rb") as f:
-    #     encoded_image = base64.b64encode(f.read())
+        os.remove(input_image_path)
 
-    # os.remove(input_image_path)
-
-    # return encoded_image
-
-    os.remove(input_image_path)
-
-    return {"result": "OK"}
+        return output_base64_image_dictionary
+    except:
+        return return_response_handler()
 
 
 def main():
