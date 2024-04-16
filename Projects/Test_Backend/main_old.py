@@ -155,7 +155,7 @@ async def receive_image(
 
 def main():
     initialize_model()
-    uvicorn.run("main:app", host="0.0.0.0", port=8000)
+    uvicorn.run("main_old:app", host="0.0.0.0", port=8000)
 
 
 if __name__ == "__main__":
