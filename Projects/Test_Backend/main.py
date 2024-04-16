@@ -112,7 +112,7 @@ async def receive_image(
     if not await validate_token(token):
         return return_response_handler()
 
-    print(token)
+    # print(token)
 
     # Validate input image
     if img_file.content_type.split("/")[0] != "image":
@@ -132,13 +132,17 @@ async def receive_image(
 
     # Generate background image (carvekit)
     rmbg_image = carvekit_processing(input_image_path)
-    rmbg_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg" + ".png"
-    rmbg_image.save(rmbg_image_path)
+
+    # # Save rmbg_image (DEBUG)
+    # rmbg_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg" + ".png"
+    # rmbg_image.save(rmbg_image_path)
 
     # Generate mask
     image_mask = get_mask(rmbg_image)
-    image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
-    image_mask.save(image_mask_path)
+
+    # # Save image mask (DEBUG)
+    # image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
+    # image_mask.save(image_mask_path)
 
     # Convert the image to base64 format for response
     # with open(output_image_path, "rb") as f:
