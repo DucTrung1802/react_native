@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 from diffusers.utils import load_image
 
+from PIL import Image
 import PIL.Image
 from carvekit.api.interface import Interface
 from carvekit.ml.wrap.fba_matting import FBAMatting
@@ -92,29 +93,24 @@ def return_response_handler():
     return False
 
 
-def carvekit_processing(input_image):
-    try:
-        rmbg_image = carvekit_processor([input_image])[0]
-        return rmbg_image
-    except:
-        return False
-
-
 def get_mask(input_image):
-    rmbg_image = carvekit_processing(input_image)
+    rmbg_image = carvekit_processor([input_image])[0]
     bg = np.array(rmbg_image)
     mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
     return mask_image
 
 
 # helper image utils
-def encode_image(image):
-    return base64.b64encode(image.tobytes()).decode("utf-8")
+def encode_image(image_path):
+    with open(image_path, "rb") as i:
+        b64 = base64.b64encode(i.read())
+        result = b64.decode("utf-8")
+    return result
 
 
-def predict(prompt, image, mask_image):
-    image = encode_image(image)
-    mask_image = encode_image(mask_image)
+def predict(prompt, image_path, mask_image_path):
+    image = encode_image(image_path)
+    mask_image = encode_image(mask_image_path)
 
     # prepare sample payload
     request = {"inputs": prompt, "image": image, "mask_image": mask_image}
@@ -128,12 +124,14 @@ def predict(prompt, image, mask_image):
     response = requests.post(ENDPOINT_URL, headers=headers, json=request)
 
     img_dict = json.loads(response.content.decode())
-    # images = []
-    # for img_str in img_dict.values():
-    #     base64_image = base64.b64decode(img_str)
+
+    # Save output (DEBUG)
+    # for i in range(len(img_dict)):
+    #     base64_image = base64.b64decode(img_dict[str(i)])
     #     buffer = BytesIO(base64_image)
-    #     image = PIL.Image.open(buffer)
-    #     images.append(image)
+    #     image = Image.open(buffer)
+    #     output_image_path = f"./images/output_image_{i}.png"
+    #     image.save(output_image_path)
 
     return img_dict
 
@@ -172,13 +170,13 @@ async def receive_image(
         # Generate mask
         image_mask = get_mask(input_image)
 
-        # # Save image mask (DEBUG)
-        # image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
-        # image_mask.save(image_mask_path)
+        # Save image mask (DEBUG)
+        image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
+        image_mask.save(image_mask_path)
 
-        output_base64_image_dictionary = predict(prompt, input_image, image_mask)
-
-        os.remove(input_image_path)
+        output_base64_image_dictionary = predict(
+            prompt, input_image_path, image_mask_path
+        )
 
         return output_base64_image_dictionary
     except:
