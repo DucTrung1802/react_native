@@ -82,13 +82,11 @@ async def validate_token(token: str):
     return False
 
 
-async def carvekit_processing(input_image_path):
+def carvekit_processing(input_image_path):
     try:
         input_image = PIL.Image.open(input_image_path)
-        output_image = carvekit_processor([input_image])[0]
-        output_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg" + ".png"
-        output_image.save(output_image_path)
-        return output_image_path
+        rmbg_image = carvekit_processor([input_image])[0]
+        return rmbg_image
     except:
         return False
 
@@ -98,10 +96,8 @@ def return_response_handler():
     return False
 
 
-def get_mask(image_path) -> PIL.Image:
-    image = load_image(image_path)
-    bg = carvekit_processor([image])[0]
-    bg = np.array(bg)
+def get_mask(rmbg_image):
+    bg = np.array(rmbg_image)
     mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
     return mask_image
 
@@ -122,11 +118,10 @@ async def receive_image(
     if img_file.content_type.split("/")[0] != "image":
         return return_response_handler()
 
-    # Validate image file
+    # Write image file
     image_name, image_extension = img_file.filename.split(".")
 
     input_image_path: str = "./images/" + image_name + "." + image_extension
-    input_image_mask_path: str = "./images/" + image_name + "_mask." + image_extension
     if os.path.exists("./images") == False:
         os.makedirs("./images")
     with open(input_image_path, "wb") as f:
@@ -135,22 +130,27 @@ async def receive_image(
     if not os.path.exists(input_image_path):
         return return_response_handler()
 
-    # Process image
-    output_image_path = await carvekit_processing(input_image_path)
-    if not os.path.exists(output_image_path):
-        return return_response_handler()
+    # Generate background image (carvekit)
+    rmbg_image = carvekit_processing(input_image_path)
+    rmbg_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg" + ".png"
+    rmbg_image.save(rmbg_image_path)
 
     # Generate mask
-    image_mask = get_mask(input_image_path)
-    image_mask.save(input_image_mask_path)
+    image_mask = get_mask(rmbg_image)
+    image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
+    image_mask.save(image_mask_path)
 
     # Convert the image to base64 format for response
-    with open(output_image_path, "rb") as f:
-        encoded_image = base64.b64encode(f.read())
+    # with open(output_image_path, "rb") as f:
+    #     encoded_image = base64.b64encode(f.read())
+
+    # os.remove(input_image_path)
+
+    # return encoded_image
 
     os.remove(input_image_path)
 
-    return encoded_image
+    return {"result": "OK"}
 
 
 def main():
