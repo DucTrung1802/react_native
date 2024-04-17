@@ -177,6 +177,7 @@ function PhotoPickerScreen({ navigation }) {
 
         if (response && response.data && response.data["0"]) {
             var newPhoto = {
+                containImage: true,
                 isImageByte: true,
                 uri: null,
                 imageBytes: response.data["0"],
@@ -195,7 +196,12 @@ function PhotoPickerScreen({ navigation }) {
         }
 
         try {
-            const base64ImageData = appContext.mainImage.uri.split(",")[1];
+            var base64ImageData
+            if (appContext.mainImage.isImageByte) {
+                base64ImageData = appContext.mainImage.imageBytes
+            } else {
+                base64ImageData = appContext.mainImage.uri.split(",")[1];
+            }
 
             const fileUri = FileSystem.documentDirectory + 'image.png';
 
@@ -245,11 +251,11 @@ function PhotoPickerScreen({ navigation }) {
                             </TouchableWithoutFeedback>
                         </View>
                         <View style={{ ...styles.interactContainer }}>
-                            {appContext.mainImage.uri && <View style={styles.titleContainer}>
+                            {appContext.mainImage.containImage && <View style={styles.titleContainer}>
                                 <Text style={styles.title}>Prompt</Text>
                             </View>}
 
-                            {appContext.mainImage.uri && <View style={styles.textInputContainer}>
+                            {appContext.mainImage.containImage && <View style={styles.textInputContainer}>
                                 <TextInput
                                     editable
                                     multiline
@@ -264,7 +270,7 @@ function PhotoPickerScreen({ navigation }) {
                                     keyboardType="default"
                                 />
                             </View>}
-                            {appContext.mainImage.uri && <CustomButton
+                            {appContext.mainImage.containImage && <CustomButton
                                 text={"Generate Background"}
                                 onPress={generateButtonHandler}
                                 buttonStyle={{ ...styles.generateButton, opacity: inputPrompt.length ? 1 : 0.4 }}
@@ -282,7 +288,7 @@ function PhotoPickerScreen({ navigation }) {
                             <CustomButton
                                 text={"+ Choose a Photo"}
                                 onPress={chooseAPhotoHandler}
-                                buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.uri ? 10 : 200 }}
+                                buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.containImage ? 10 : 200 }}
                                 buttonTextStyle={styles.buttonText}
                             />
 

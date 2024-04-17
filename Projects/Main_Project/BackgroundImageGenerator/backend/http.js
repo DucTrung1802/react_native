@@ -41,25 +41,21 @@ export async function postImageToServer(image, prompt) {
 
     // Get token
     const token = sha256(backend_ip)
-
-    const extension = image.uri.split('.').pop().toLowerCase();
-    const imgType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
-    const imgName = "input_image_" + String(Date.now()) + "." + extension
-
     formData.append("token", token)
     formData.append("prompt", prompt.trim())
 
-    if (!image.isImageByte) {
+    if (image.isImageByte) {
+        // ???
+    } else {
+        const extension = image.uri.split('.').pop().toLowerCase();
+        const imgType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
+        const imgName = "input_image_" + String(Date.now()) + "." + extension
+
         formData.append("img_file", {
             uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
             type: imgType,
             name: imgName,
         })
-    } else {
-        const binaryData = Buffer.from(image.imageBytes, 'base64').toString("binary")
-        const blob = new Blob([binaryData], { type: 'image/png' })
-        const file = new File([blob], imgName)
-        formData.append('img_file', file)
     }
 
     response = await axios.post(backend_ip + API_ROUTE, formData, { headers: { "Content-Type": "multipart/form-data", } })

@@ -48,8 +48,11 @@ function PhotoSelectionContainer({ resetScroll }) {
 
         if (!photo.canceled) {
             var newPhoto = {
+                containImage: true,
+                imageBytes: null,
+                canBeSave: false,
+                isImageByte: false,
                 uri: photo.assets[0].uri,
-                canBeSave: false
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
@@ -66,8 +69,11 @@ function PhotoSelectionContainer({ resetScroll }) {
 
         if (!photo.canceled) {
             var newPhoto = {
+                containImage: true,
+                imageBytes: null,
+                canBeSave: false,
+                isImageByte: false,
                 uri: photo.assets[0].uri,
-                canBeSave: false
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
@@ -85,8 +91,11 @@ function PhotoSelectionContainer({ resetScroll }) {
 
             Image.getSize(imageUri, async (width, height) => {
                 var newPhoto = {
+                    containImage: true,
+                    imageBytes: null,
+                    canBeSave: false,
+                    isImageByte: false,
                     uri: imageUri,
-                    canBeSave: false
                 }
                 await appContext.setMainImageAndAdd(newPhoto)
                 resetScroll()
@@ -101,8 +110,11 @@ function PhotoSelectionContainer({ resetScroll }) {
         let photo = await Clipboard.getImageAsync({})
         if (photo && photo.data && photo.size.height > 0 && photo.size.width > 0) {
             var newPhoto = {
+                containImage: true,
+                imageBytes: null,
+                canBeSave: false,
+                isImageByte: false,
                 uri: photo.data,
-                canBeSave: false
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
