@@ -3,10 +3,9 @@ import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler'
 import BottomSheet from '../components/BottomSheet';
 import { GlobalStyles } from '../constants/styles'
 import {
-    AppState, StyleSheet, Text, View,
-    Image, Alert, ScrollView,
-    TouchableWithoutFeedback, Keyboard,
-    Dimensions
+    StyleSheet, Text, View,
+    Image, Alert, TouchableWithoutFeedback,
+    Keyboard, Dimensions
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import { useCameraPermissions } from 'expo-image-picker';
@@ -18,7 +17,9 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { postImageToServer } from "../backend/http"
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const IMAGE_SIZE_ACTIVATED_KEYBOARD = SCREEN_WIDTH - 150
+const IMAGE_SIZE_DEACTIVATED_KEYBOARD = SCREEN_WIDTH - 40
 
 function PhotoPickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -214,16 +215,24 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     return (
-        <>
+        <View style={styles.outerContainer}>
             <TouchableWithoutFeedback onPress={handlePressOutside}>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <View style={styles.container}>
-                        <View style={{ ...styles.imagePreviewContainer }}>
+                        <View style={{
+                            ...styles.imagePreviewContainer,
+                            width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                            height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
+                        }}>
                             <TouchableWithoutFeedback
                                 onPress={handlePressOutside}
                             >
                                 <Image
-                                    style={styles.imagePreview}
+                                    style={{
+                                        ...styles.imagePreview,
+                                        width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                                        height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
+                                    }}
                                     source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
                                 />
                             </TouchableWithoutFeedback>
@@ -232,44 +241,44 @@ function PhotoPickerScreen({ navigation }) {
                             {appContext.mainImage.uri && <View style={styles.titleContainer}>
                                 <Text style={styles.title}>Prompt</Text>
                             </View>}
-                            <ScrollView>
-                                {appContext.mainImage.uri && <View style={styles.textInputContainer}>
-                                    <TextInput
-                                        editable
-                                        multiline
-                                        textAlignVertical='top'
-                                        numberOfLines={4}
-                                        maxLength={150}
-                                        placeholder="Enter your prompt here..."
-                                        value={inputPrompt}
-                                        placeholderTextColor="#b3b3b3"
-                                        onChangeText={text => onChangeTextHandler(text)}
-                                        style={styles.textInput}
-                                        keyboardType="default"
-                                    />
-                                </View>}
-                                {appContext.mainImage.uri && <CustomButton
-                                    text={"Generate Background"}
-                                    onPress={generateButtonHandler}
-                                    buttonStyle={{ ...styles.generateButton, opacity: inputPrompt.length ? 1 : 0.4 }}
-                                    buttonTextStyle={styles.buttonText}
-                                    disabled={!inputPrompt.length}
-                                />}
-                                {appContext.mainImage.canBeSave && <CustomButton
-                                    // {/* {<CustomButton */}
-                                    text={"Save Image"}
-                                    onPress={saveImageHandler}
-                                    buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.canBeSave ? 1 : 0.4 }}
-                                    buttonTextStyle={styles.buttonText}
-                                    disabled={!appContext.mainImage.canBeSave}
-                                />}
-                                <CustomButton
-                                    text={"+ Choose a Photo"}
-                                    onPress={chooseAPhotoHandler}
-                                    buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.uri ? 10 : 200 }}
-                                    buttonTextStyle={styles.buttonText}
+
+                            {appContext.mainImage.uri && <View style={styles.textInputContainer}>
+                                <TextInput
+                                    editable
+                                    multiline
+                                    textAlignVertical='top'
+                                    numberOfLines={4}
+                                    maxLength={150}
+                                    placeholder="Enter your prompt here..."
+                                    value={inputPrompt}
+                                    placeholderTextColor="#b3b3b3"
+                                    onChangeText={text => onChangeTextHandler(text)}
+                                    style={styles.textInput}
+                                    keyboardType="default"
                                 />
-                            </ScrollView>
+                            </View>}
+                            {appContext.mainImage.uri && <CustomButton
+                                text={"Generate Background"}
+                                onPress={generateButtonHandler}
+                                buttonStyle={{ ...styles.generateButton, opacity: inputPrompt.length ? 1 : 0.4 }}
+                                buttonTextStyle={styles.buttonText}
+                                disabled={!inputPrompt.length}
+                            />}
+                            {appContext.mainImage.canBeSave && <CustomButton
+                                // {/* {<CustomButton */}
+                                text={"Save Image"}
+                                onPress={saveImageHandler}
+                                buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.canBeSave ? 1 : 0.4 }}
+                                buttonTextStyle={styles.buttonText}
+                                disabled={!appContext.mainImage.canBeSave}
+                            />}
+                            <CustomButton
+                                text={"+ Choose a Photo"}
+                                onPress={chooseAPhotoHandler}
+                                buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.uri ? 10 : 200 }}
+                                buttonTextStyle={styles.buttonText}
+                            />
+
                         </View>
                         <BottomSheet ref={ref} >
                             <PhotoSelectionContainer resetScroll={resetScrollHandler} />
@@ -278,31 +287,36 @@ function PhotoPickerScreen({ navigation }) {
                 </GestureHandlerRootView >
             </TouchableWithoutFeedback>
             {isGenerating && <OverlayView onPress={() => { setIsGeneratingHandler(false) }} />}
-        </>
+        </View >
     )
 }
 
 export default PhotoPickerScreen;
 
 const styles = StyleSheet.create({
+    outerContainer: {
+        height: '100%',
+    },
     container: {
-        flex: 1,
+        height: '100%',
         backgroundColor: GlobalStyles.colors.primary400,
         alignItems: 'center',
         justifyContent: 'top',
     },
     imagePreviewContainer: {
         marginTop: 10,
-        height: 310,
-        width: 310,
-        // backgroundColor: 'green'F
+        height: 300,
+        width: 300,
+        // backgroundColor: 'green',
+        alignItems: "center",
+        justifyContent: 'center',
     },
     imagePreview: {
         height: 300,
         width: 300,
         borderRadius: 10,
-        top: 5,
-        left: 5,
+        borderColor: "white",
+        borderWidth: 3,
     },
     titleContainer: {
         // backgroundColor: "red",
