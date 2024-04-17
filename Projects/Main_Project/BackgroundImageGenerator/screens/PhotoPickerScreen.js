@@ -9,10 +9,7 @@ import {
     Dimensions
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
-import {
-    useCameraPermissions,
-    PermissionStatus,
-} from 'expo-image-picker';
+import { useCameraPermissions } from 'expo-image-picker';
 import { ImageContext } from "../store/ContextProvider";
 import * as Clipboard from 'expo-clipboard';
 import CustomButton from "../components/CustomButton";
@@ -20,6 +17,8 @@ import OverlayView from '../components/OverlayView';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { postImageToServer } from "../backend/http"
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 function PhotoPickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
@@ -35,16 +34,27 @@ function PhotoPickerScreen({ navigation }) {
 
     const [inputPrompt, setInputPrompt] = useState("");
 
-    useEffect(() => {
-        // Add event listener when component mounts
-        AppState.addEventListener("change", handleAppStateChange);
+    const [isKeyboardActive, setIsKeyboardActive] = useState(false);
 
-        // Remove event listener when component unmounts
-        return () => {
-            try {
-                AppState.removeEventListener("change", handleAppStateChange);
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            () => {
+                setIsKeyboardActive(true);
             }
-            catch (ex) { }
+        );
+
+        const keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            () => {
+                setIsKeyboardActive(false);
+            }
+        );
+
+        // Clean up listeners
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
         };
     }, []);
 
@@ -121,6 +131,7 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function chooseAPhotoHandler() {
+        console.log('Vertical dimension of the screen:', SCREEN_HEIGHT);
         const hasPermission = await verifyCameraPermissions();
 
         if (!hasPermission) {
@@ -163,9 +174,9 @@ function PhotoPickerScreen({ navigation }) {
         // Post-process response
         // console.log(response)
 
-        if (response && response.data) {
+        if (response && response.data && response.data["0"]) {
             var newPhoto = {
-                uri: `data:image/png;base64,${response.data}`,
+                uri: `data:image/png;base64,${response.data["0"]}`,
                 canBeSave: true,
             }
 
@@ -207,18 +218,20 @@ function PhotoPickerScreen({ navigation }) {
             <TouchableWithoutFeedback onPress={handlePressOutside}>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <View style={styles.container}>
-                        <View style={{ ...styles.imagePreviewContainer, flex: appContext.mainImage.uri ? 1.6 : 6 }}>
-                            <TouchableWithoutFeedback onPress={handlePressOutside}>
+                        <View style={{ ...styles.imagePreviewContainer }}>
+                            <TouchableWithoutFeedback
+                                onPress={handlePressOutside}
+                            >
                                 <Image
                                     style={styles.imagePreview}
                                     source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
                                 />
                             </TouchableWithoutFeedback>
                         </View>
-                        {appContext.mainImage.uri && <View style={styles.titleContainer}>
-                            <Text style={styles.title}>Prompt</Text>
-                        </View>}
-                        <View style={styles.interactContainer}>
+                        <View style={{ ...styles.interactContainer }}>
+                            {appContext.mainImage.uri && <View style={styles.titleContainer}>
+                                <Text style={styles.title}>Prompt</Text>
+                            </View>}
                             <ScrollView>
                                 {appContext.mainImage.uri && <View style={styles.textInputContainer}>
                                     <TextInput
@@ -242,17 +255,18 @@ function PhotoPickerScreen({ navigation }) {
                                     buttonTextStyle={styles.buttonText}
                                     disabled={!inputPrompt.length}
                                 />}
-                                {appContext.mainImage.uri && <CustomButton
+                                {appContext.mainImage.canBeSave && <CustomButton
+                                    // {/* {<CustomButton */}
                                     text={"Save Image"}
                                     onPress={saveImageHandler}
                                     buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.canBeSave ? 1 : 0.4 }}
                                     buttonTextStyle={styles.buttonText}
-                                    disabled={!inputPrompt.length}
+                                    disabled={!appContext.mainImage.canBeSave}
                                 />}
                                 <CustomButton
                                     text={"+ Choose a Photo"}
                                     onPress={chooseAPhotoHandler}
-                                    buttonStyle={styles.chooseButton}
+                                    buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.uri ? 10 : 200 }}
                                     buttonTextStyle={styles.buttonText}
                                 />
                             </ScrollView>
@@ -275,39 +289,41 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: GlobalStyles.colors.primary400,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'top',
     },
     imagePreviewContainer: {
-        flex: 1.5,
-        alignContent: 'center',
-        justifyContent: "top",
-        padding: 15,
-        // backgroundColor: 'green'
+        marginTop: 10,
+        height: 310,
+        width: 310,
+        // backgroundColor: 'green'F
     },
     imagePreview: {
         height: 300,
         width: 300,
         borderRadius: 10,
+        top: 5,
+        left: 5,
     },
     titleContainer: {
         // backgroundColor: "red",
-        width: "90%"
+        width: "90%",
+        left: "5%",
+        marginVertical: 5
     },
     title: {
         color: "white",
         fontWeight: "bold",
-        fontSize: 20
+        fontSize: 20,
     },
     interactContainer: {
-        flex: 2,
         // backgroundColor: 'orange',
         width: "100%",
-        justifyContent: 'center'
+        justifyContent: 'top',
     },
     textInputContainer: {
         marginHorizontal: "5%",
         backgroundColor: GlobalStyles.colors.primary800,
-        marginVertical: 10,
+        marginVertical: 5,
         borderRadius: 10,
         // backgroundColor: "red"
     },
@@ -322,17 +338,16 @@ const styles = StyleSheet.create({
         marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
-        height: 50,
+        height: 40,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.primary800,
         opacity: 1,
-        marginVertical: 10
     },
     generateButton: {
         marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
-        height: 50,
+        height: 40,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.red500,
         marginVertical: 10
@@ -341,7 +356,7 @@ const styles = StyleSheet.create({
         marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
-        height: 50,
+        height: 40,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.accent500,
         marginVertical: 10
