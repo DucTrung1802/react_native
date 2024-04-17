@@ -30,6 +30,10 @@ export async function postImageToServer(image, prompt) {
         responseErrorHandler()
     }
 
+    if (!image.uri && !image.imageBytes) {
+        responseErrorHandler()
+    }
+
     // Initialize FormData
     const formData = new FormData();
 
@@ -44,13 +48,20 @@ export async function postImageToServer(image, prompt) {
 
     formData.append("token", token)
     formData.append("prompt", prompt.trim())
-    formData.append("img_file", {
-        uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
-        type: imgType,
-        name: imgName,
-    })
 
-    response = await axios.get(backend_ip)
+    if (!image.isImageByte) {
+        formData.append("img_file", {
+            uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
+            type: imgType,
+            name: imgName,
+        })
+    } else {
+        const binaryData = Buffer.from(image.imageBytes, 'base64').toString("binary")
+        const blob = new Blob([binaryData], { type: 'image/png' })
+        const file = new File([blob], imgName)
+        formData.append('img_file', file)
+    }
+
     response = await axios.post(backend_ip + API_ROUTE, formData, { headers: { "Content-Type": "multipart/form-data", } })
     return response
 }

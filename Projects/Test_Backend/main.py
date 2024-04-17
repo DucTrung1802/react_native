@@ -94,7 +94,7 @@ def return_response_handler():
 
 
 def get_mask(input_image):
-    rmbg_image = carvekit_processor([input_image])[0]
+    rmbg_image = carvekit_processor([input_image.resize((2048, 2048))])[0]
     bg = np.array(rmbg_image)
     mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
     return mask_image
@@ -151,7 +151,17 @@ async def receive_image(
     if not await validate_token(token):
         return return_response_handler()
 
-    # print(token)
+    print("img_file:", img_file)
+    print()
+    print("img_file.file:", img_file.file)
+    print()
+    print("img_file.filename:", img_file.filename)
+    print()
+    print("img_file.size:", img_file.size)
+    print()
+    print("img_file.headers:", img_file.headers)
+    print()
+    print("img_file.content_type:", img_file.content_type)
 
     # Validate input image
     if img_file.content_type.split("/")[0] != "image":

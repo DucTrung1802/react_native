@@ -177,7 +177,9 @@ function PhotoPickerScreen({ navigation }) {
 
         if (response && response.data && response.data["0"]) {
             var newPhoto = {
-                uri: `data:image/png;base64,${response.data["0"]}`,
+                isImageByte: true,
+                uri: null,
+                imageBytes: response.data["0"],
                 canBeSave: true,
             }
 
@@ -233,7 +235,12 @@ function PhotoPickerScreen({ navigation }) {
                                         width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
                                     }}
-                                    source={appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder}
+                                    source={
+                                        !appContext.mainImage.uri && !appContext.mainImage.imageBytes ?
+                                            imagePlaceholder : appContext.mainImage.isImageByte ?
+                                                { uri: `data:image/png;base64,${appContext.mainImage.imageBytes}` } :
+                                                { uri: appContext.mainImage.uri }
+                                    }
                                 />
                             </TouchableWithoutFeedback>
                         </View>
