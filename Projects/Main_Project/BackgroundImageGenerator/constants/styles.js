@@ -18,4 +18,4 @@ export const GlobalStyles = {
 
 export const MAX_IMAGE_STORE = 18
 
-export const IMAGE_GENERATION_TIMEOUT = 10
+export const IMAGE_GENERATION_TIMEOUT = 25

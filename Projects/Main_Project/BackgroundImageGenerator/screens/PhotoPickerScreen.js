@@ -177,7 +177,7 @@ function PhotoPickerScreen({ navigation }) {
 
         if (response && response.data && response.data["0"]) {
 
-            const filePath = `${FileSystem.documentDirectory}/output_image_${String(Date.now())}.png`;
+            const filePath = `${FileSystem.documentDirectory}output_image_${String(Date.now())}.png`;
             await FileSystem.writeAsStringAsync(filePath, response.data["0"], { encoding: "base64" }) // Write binary data to file
                 .then(() => {
                     console.log('Image saved successfully.');
@@ -187,11 +187,8 @@ function PhotoPickerScreen({ navigation }) {
                 });
 
             var newPhoto = {
-                containImage: true,
-                isImageByte: false,
                 uri: filePath,
-                imageBytes: null,
-                canBeSave: true,
+                isGenerated: true,
             }
 
             appContext.setMainImage(newPhoto)
@@ -206,21 +203,7 @@ function PhotoPickerScreen({ navigation }) {
         }
 
         try {
-            var base64ImageData
-            if (appContext.mainImage.isImageByte) {
-                base64ImageData = appContext.mainImage.imageBytes
-            } else {
-                base64ImageData = appContext.mainImage.uri.split(",")[1];
-            }
-
-            const fileUri = FileSystem.documentDirectory + 'image.png';
-
-            await FileSystem.writeAsStringAsync(fileUri, base64ImageData, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
-
-            // Once the file is saved, you can save it to the media library
-            await MediaLibrary.createAssetAsync(fileUri);
+            await MediaLibrary.createAssetAsync(appContext.mainImage.uri);
 
             Alert.alert(
                 'Successfully!',
@@ -252,20 +235,17 @@ function PhotoPickerScreen({ navigation }) {
                                         height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
                                     }}
                                     source={
-                                        !appContext.mainImage.uri && !appContext.mainImage.imageBytes ?
-                                            imagePlaceholder : appContext.mainImage.isImageByte ?
-                                                { uri: `data:image/png;base64,${appContext.mainImage.imageBytes}` } :
-                                                { uri: appContext.mainImage.uri }
+                                        appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
                                 />
                             </TouchableWithoutFeedback>
                         </View>
                         <View style={{ ...styles.interactContainer }}>
-                            {appContext.mainImage.containImage && <View style={styles.titleContainer}>
+                            {appContext.mainImage.uri && <View style={styles.titleContainer}>
                                 <Text style={styles.title}>Prompt</Text>
                             </View>}
 
-                            {appContext.mainImage.containImage && <View style={styles.textInputContainer}>
+                            {appContext.mainImage.uri && <View style={styles.textInputContainer}>
                                 <TextInput
                                     editable
                                     multiline
@@ -280,25 +260,25 @@ function PhotoPickerScreen({ navigation }) {
                                     keyboardType="default"
                                 />
                             </View>}
-                            {appContext.mainImage.containImage && <CustomButton
+                            {appContext.mainImage.uri && <CustomButton
                                 text={"Generate Background"}
                                 onPress={generateButtonHandler}
                                 buttonStyle={{ ...styles.generateButton, opacity: inputPrompt.length ? 1 : 0.4 }}
                                 buttonTextStyle={styles.buttonText}
                                 disabled={!inputPrompt.length}
                             />}
-                            {appContext.mainImage.canBeSave && <CustomButton
+                            {appContext.mainImage.isGenerated && <CustomButton
                                 // {/* {<CustomButton */}
                                 text={"Save Image"}
                                 onPress={saveImageHandler}
-                                buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.canBeSave ? 1 : 0.4 }}
+                                buttonStyle={{ ...styles.saveImageButton, opacity: appContext.mainImage.isGenerated ? 1 : 0.4 }}
                                 buttonTextStyle={styles.buttonText}
-                                disabled={!appContext.mainImage.canBeSave}
+                                disabled={!appContext.mainImage.isGenerated}
                             />}
                             <CustomButton
                                 text={"+ Choose a Photo"}
                                 onPress={chooseAPhotoHandler}
-                                buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.containImage ? 10 : 200 }}
+                                buttonStyle={{ ...styles.chooseButton, marginTop: appContext.mainImage.uri ? 10 : 200 }}
                                 buttonTextStyle={styles.buttonText}
                             />
 
