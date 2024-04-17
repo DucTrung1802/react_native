@@ -5,7 +5,8 @@ import { GlobalStyles } from '../constants/styles'
 import {
     AppState, StyleSheet, Text, View,
     Image, Alert, ScrollView,
-    TouchableWithoutFeedback, Keyboard
+    TouchableWithoutFeedback, Keyboard,
+    Dimensions
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import {
