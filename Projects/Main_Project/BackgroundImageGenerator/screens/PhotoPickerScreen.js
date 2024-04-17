@@ -176,11 +176,21 @@ function PhotoPickerScreen({ navigation }) {
         // console.log(response)
 
         if (response && response.data && response.data["0"]) {
+
+            const filePath = `${FileSystem.documentDirectory}/output_image_${String(Date.now())}.png`;
+            await FileSystem.writeAsStringAsync(filePath, response.data["0"], { encoding: "base64" }) // Write binary data to file
+                .then(() => {
+                    console.log('Image saved successfully.');
+                })
+                .catch(error => {
+                    console.error('Error saving image:', error);
+                });
+
             var newPhoto = {
                 containImage: true,
-                isImageByte: true,
-                uri: null,
-                imageBytes: response.data["0"],
+                isImageByte: false,
+                uri: filePath,
+                imageBytes: null,
                 canBeSave: true,
             }
 
