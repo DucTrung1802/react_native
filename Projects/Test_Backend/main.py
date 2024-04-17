@@ -113,7 +113,12 @@ def predict(prompt, image_path, mask_image_path):
     mask_image = encode_image(mask_image_path)
 
     # prepare sample payload
-    request = {"inputs": prompt, "image": image, "mask_image": mask_image}
+    request = {
+        "inputs": prompt,
+        "image": image,
+        "mask_image": mask_image,
+        "num_images": 1,
+    }
     # headers
     headers = {
         "Authorization": f"Bearer {HF_TOKEN}",
