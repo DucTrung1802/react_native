@@ -1,5 +1,6 @@
 import { createContext, useState } from 'react';
 import { MAX_IMAGE_STORE } from '../constants/styles';
+import axios from "axios";
 
 export const ImageContext = createContext({
     disableClipboardButton: true,
@@ -9,10 +10,12 @@ export const ImageContext = createContext({
         isGenerated: false,
     },
     imageList: [],
+    cancelToken: null,
     setDisableClipboardButton: (value) => { },
     setImageInClipboard: (imageInClipboard) => { },
     setMainImage: (image) => { },
     setMainImageAndAdd: async (image) => { },
+    setCancelToken: async (source) => { },
 });
 
 function ContextProvider({ children }) {
@@ -20,6 +23,7 @@ function ContextProvider({ children }) {
     const [currentImageInClipboard, setCurrentImageInClipboard] = useState(null)
     const [currentMainImage, setCurrentMainImage] = useState({})
     const [currentImageList, setCurrentImageList] = useState([])
+    const [currentCancelToken, setCurrentCancelToken] = useState(null);
 
     function setDisableClipboardButton(value) {
         setCurrentDisableClipboardButton(value)
@@ -41,15 +45,21 @@ function ContextProvider({ children }) {
         setCurrentImageList((imageList) => [newMainImage, ...imageList])
     }
 
+    function setCancelToken(source) {
+        setCurrentCancelToken(source)
+    }
+
     const value = {
         disableClipboardButton: currentDisableClipboardButton,
         imageInClipboard: currentImageInClipboard,
         mainImage: currentMainImage,
         imageList: currentImageList,
+        cancelToken: currentCancelToken,
         setDisableClipboardButton: setDisableClipboardButton,
         setImageInClipboard: setImageInClipboard,
         setMainImage: setMainCurrentImage,
-        setMainImageAndAdd: setMainCurrentImageAndAddToList
+        setMainImageAndAdd: setMainCurrentImageAndAddToList,
+        setCancelToken: setCancelToken
     }
 
     return (

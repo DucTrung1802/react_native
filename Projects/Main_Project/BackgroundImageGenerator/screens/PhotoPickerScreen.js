@@ -16,6 +16,7 @@ import OverlayView from '../components/OverlayView';
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { postImageToServer } from "../backend/http"
+import axios from "axios";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_SIZE_ACTIVATED_KEYBOARD = SCREEN_WIDTH - 150
@@ -132,7 +133,7 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function chooseAPhotoHandler() {
-        console.log('Vertical dimension of the screen:', SCREEN_HEIGHT);
+        // console.log('Vertical dimension of the screen:', SCREEN_HEIGHT);
         const hasPermission = await verifyCameraPermissions();
 
         if (!hasPermission) {
@@ -160,22 +161,29 @@ function PhotoPickerScreen({ navigation }) {
         Keyboard.dismiss(); // Dismiss the keyboard
     };
 
-    function setIsGeneratingHandler(value) {
+    function cancelButtonHandler(value) {
         setIsGenerating(value)
+        if (appContext.cancelToken) {
+            appContext.cancelToken.cancel('Request canceled by user')
+        }
     }
 
     async function generateButtonHandler() {
         var response;
-        setIsGeneratingHandler(true);
+
+        const source = axios.CancelToken.source();
+        await appContext.setCancelToken(source)
+
+        setIsGenerating(true);
         while (!response) {
-            response = await postImageToServer(appContext.mainImage, inputPrompt);
+            response = await postImageToServer(appContext.mainImage, inputPrompt, source);
         }
-        setIsGeneratingHandler(false);
+        setIsGenerating(false);
 
         // Post-process response
         // console.log(response)
 
-        if (response && response.data && response.data["0"]) {
+        if (!response.cancel && response.data && response.data["0"]) {
 
             const filePath = `${FileSystem.documentDirectory}output_image_${String(Date.now())}.png`;
             await FileSystem.writeAsStringAsync(filePath, response.data["0"], { encoding: "base64" }) // Write binary data to file
@@ -289,7 +297,7 @@ function PhotoPickerScreen({ navigation }) {
                     </View >
                 </GestureHandlerRootView >
             </TouchableWithoutFeedback>
-            {isGenerating && <OverlayView onPress={() => { setIsGeneratingHandler(false) }} />}
+            {isGenerating && <OverlayView onPress={() => { cancelButtonHandler(false) }} />}
         </View >
     )
 }

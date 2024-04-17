@@ -23,7 +23,7 @@ function base64ToBlob(base64String, contentType) {
     return new Blob([byteCharacters], { type: contentType });
 }
 
-export async function postImageToServer(image, prompt) {
+export async function postImageToServer(image, prompt, cancelTokenSource) {
     var response
 
     // Validate backend IP
@@ -68,6 +68,20 @@ export async function postImageToServer(image, prompt) {
         })
     }
 
-    response = await axios.post(backend_ip + API_ROUTE, formData, { headers: { "Content-Type": "multipart/form-data", } })
-    return response
+    try {
+        response = await axios.post(backend_ip + API_ROUTE, formData,
+            {
+                headers: { "Content-Type": "multipart/form-data", },
+                cancelToken: cancelTokenSource.token
+            })
+        return response
+    } catch (error) {
+        if (axios.isCancel(error)) {
+            console.log('Request canceled:', error.message);
+            return { "cancel": true }
+        } else {
+            console.log('Error:', error);
+        }
+
+    }
 }
