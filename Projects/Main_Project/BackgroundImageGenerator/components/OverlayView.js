@@ -18,7 +18,7 @@ function OverlayView({ onPress }) {
                 <ActivityIndicator size={70} color="white" />
                 <Text style={styles.waitingText}>Waiting for image generation!</Text>
             </View>
-            <TouchableOpacity onPress={onPress} style={{ ...styles.overlayButton, opacity: countdown > 0 ? 0.6 : 1 }} disabled={countdown > 0}>
+            <TouchableOpacity onPress={onPress} style={{ ...styles.overlayButton, opacity: countdown > 0 ? 0.8 : 1 }} disabled={countdown > 0}>
                 <Text style={styles.buttonText}>{countdown > 0 ? countdown : "Cancel"}</Text>
             </TouchableOpacity>
         </View>
