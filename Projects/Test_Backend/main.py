@@ -60,13 +60,10 @@ class Request(BaseModel):
 
 @app.get("/")
 async def root():
-    # response = requests.get("")
-    # results = response.json()
     return "HELLO CLIENT"
 
 
 def calculate_sha256(data):
-    # Convert data to bytes if it’s not already
     if isinstance(data, str):
         data = data.encode()
 
@@ -119,6 +116,7 @@ def predict(prompt, image_path, mask_image_path):
         "mask_image": mask_image,
         "num_images": 1,
     }
+
     # headers
     headers = {
         "Authorization": f"Bearer {HF_TOKEN}",
@@ -129,14 +127,6 @@ def predict(prompt, image_path, mask_image_path):
     response = requests.post(ENDPOINT_URL, headers=headers, json=request)
 
     img_dict = json.loads(response.content.decode())
-
-    # Save output (DEBUG)
-    # for i in range(len(img_dict)):
-    #     base64_image = base64.b64decode(img_dict[str(i)])
-    #     buffer = BytesIO(base64_image)
-    #     image = Image.open(buffer)
-    #     output_image_path = f"./images/output_image_{i}.png"
-    #     image.save(output_image_path)
 
     return img_dict
 
@@ -150,18 +140,6 @@ async def receive_image(
     # Validate token
     if not await validate_token(token):
         return return_response_handler()
-
-    print("img_file:", img_file)
-    print()
-    print("img_file.file:", img_file.file)
-    print()
-    print("img_file.filename:", img_file.filename)
-    print()
-    print("img_file.size:", img_file.size)
-    print()
-    print("img_file.headers:", img_file.headers)
-    print()
-    print("img_file.content_type:", img_file.content_type)
 
     # Validate input image
     if img_file.content_type.split("/")[0] != "image":
