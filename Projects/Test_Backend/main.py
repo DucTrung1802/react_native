@@ -5,9 +5,7 @@ import os
 from typing import Annotated
 import numpy as np
 import cv2
-from diffusers.utils import load_image
 
-from PIL import Image
 import PIL.Image
 from carvekit.api.interface import Interface
 from carvekit.ml.wrap.fba_matting import FBAMatting
@@ -19,7 +17,6 @@ from carvekit.trimap.generator import TrimapGenerator
 import requests
 import hashlib
 import json
-from io import BytesIO
 
 import base64
 
@@ -105,7 +102,7 @@ def encode_image(image_path):
     return result
 
 
-def predict(prompt, image_path, mask_image_path):
+def predict(prompt, negative_prompt, image_path, mask_image_path):
     image = encode_image(image_path)
     mask_image = encode_image(mask_image_path)
 
@@ -114,6 +111,7 @@ def predict(prompt, image_path, mask_image_path):
         "inputs": prompt,
         "image": image,
         "mask_image": mask_image,
+        "negative_prompt": negative_prompt,
         "num_images": 1,
     }
 
@@ -135,6 +133,7 @@ def predict(prompt, image_path, mask_image_path):
 async def receive_image(
     token: Annotated[str, Form()],
     prompt: Annotated[str, Form()],
+    negative_prompt: Annotated[str, Form()],
     img_file: Annotated[UploadFile, File()],
 ):
     # Validate token
@@ -168,7 +167,7 @@ async def receive_image(
         image_mask.save(image_mask_path)
 
         output_base64_image_dictionary = predict(
-            prompt, input_image_path, image_mask_path
+            prompt, negative_prompt, input_image_path, image_mask_path
         )
 
         return output_base64_image_dictionary

@@ -1,6 +1,5 @@
 import { createContext, useState } from 'react';
 import { MAX_IMAGE_STORE } from '../constants/styles';
-import axios from "axios";
 
 export const ImageContext = createContext({
     disableClipboardButton: true,

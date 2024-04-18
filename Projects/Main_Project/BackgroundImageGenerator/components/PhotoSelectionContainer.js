@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Alert } from "react-native";
 import { GlobalStyles } from "../constants/styles";
 import CustomButton from "./CustomButton";

@@ -1,5 +1,4 @@
 import { StyleSheet, TouchableOpacity, Text } from "react-native";
-import { GlobalStyles } from "../constants/styles";
 
 function CustomButton({ icon, text, onPress, buttonStyle, buttonTextStyle, disabled }) {
     return (

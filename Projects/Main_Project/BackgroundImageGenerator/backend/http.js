@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 import FormData from 'form-data'
 global.Buffer = require('buffer').Buffer;
 
+// const IP_CONFIGURE_URL = process.env.IP_CONFIGURE_URL
 const IP_CONFIGURE_URL = "https://raw.githubusercontent.com/DucTrung1802/gcp_ip/main/gcp_ip.json"
 const API_ROUTE = "/post_request"
 const ENGLISH_KEYBOARD_NONEMPTY_REGEX = /^[ -~]+$/
@@ -23,7 +24,7 @@ function base64ToBlob(base64String, contentType) {
     return new Blob([byteCharacters], { type: contentType });
 }
 
-export async function postImageToServer(image, prompt, cancelTokenSource) {
+export async function postImageToServer(image, prompt, nagativePrompt, cancelTokenSource) {
     var response
 
     // Validate backend IP
@@ -50,6 +51,7 @@ export async function postImageToServer(image, prompt, cancelTokenSource) {
     const token = sha256(backend_ip)
     formData.append("token", token)
     formData.append("prompt", prompt.trim())
+    formData.append("negative_prompt", nagativePrompt.trim())
 
     if (image.isImageByte) {
         const base64Image = image.imageBytes
