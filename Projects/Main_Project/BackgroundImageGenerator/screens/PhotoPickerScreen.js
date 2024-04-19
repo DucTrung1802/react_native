@@ -41,17 +41,17 @@ function PhotoPickerScreen({ navigation }) {
 
     const [isKeyboardActive, setIsKeyboardActive] = useState(false);
 
-    const [networkState, setNetworkState] = useState(null);
+    const [isConnected, setIsConnected] = useState(true);
 
     useEffect(() => {
         // Get the network state once
         NetInfo.fetch().then(state => {
-            setNetworkState(state);
+            setIsConnected(state.isInternetReachable);
         });
 
         // Subscribe to network state updates
         const unsubscribe = NetInfo.addEventListener(state => {
-            setNetworkState(state);
+            setIsConnected(state.isInternetReachable);
         });
 
         // Unsubscribe from network state updates
@@ -59,6 +59,16 @@ function PhotoPickerScreen({ navigation }) {
             unsubscribe();
         };
     }, []);
+
+    useEffect(() => {
+        if (!isConnected) {
+            setIsGenerating(false)
+            Alert.alert(
+                'Cannot connect to the Internet!',
+                'Please connect to the Internet to generate images.'
+            )
+        }
+    }, [isConnected]);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener(
@@ -81,6 +91,8 @@ function PhotoPickerScreen({ navigation }) {
             keyboardDidHideListener.remove();
         };
     }, []);
+
+
 
     function onChangeInputPromptTextHandler(value) {
         value = value.replace("\n", "")
@@ -171,7 +183,7 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function generateButtonHandler() {
-        if (!(networkState && networkState.isConnected && networkState.isInternetReachable)) {
+        if (!isConnected) {
             Alert.alert(
                 'Cannot connect to the Internet!',
                 'Please connect to the Internet to generate images.'
@@ -185,7 +197,7 @@ function PhotoPickerScreen({ navigation }) {
         await appContext.setCancelToken(source)
 
         setIsGenerating(true);
-        while (!response) {
+        while (!response && isConnected) {
             response = await postImageToServer(appContext.mainImage, inputPrompt, inputNegativePrompt, source);
         }
         setIsGenerating(false);
@@ -323,7 +335,7 @@ function PhotoPickerScreen({ navigation }) {
                     </BottomSheet>
                 </View >
             </GestureHandlerRootView >
-            {isGenerating && networkState && <OverlayView onPress={() => { cancelButtonHandler(false) }} />}
+            {isGenerating && <OverlayView onPress={() => { cancelButtonHandler(false) }} />}
         </View >
     )
 }
