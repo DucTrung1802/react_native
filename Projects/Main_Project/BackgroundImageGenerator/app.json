@@ -1,27 +1,34 @@
 {
   "expo": {
-    "name": "BackgroundImageGenerator",
+    "name": "Background Image Generator",
     "slug": "BackgroundImageGenerator",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon_app.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#5721d4"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "buildNumber": "1.0.0",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ductrung.BackgroundImageGenerator"
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.ductrung.BackgroundImageGenerator"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,6 +41,17 @@
           "photosPermission": "Grant the Photo Library permissions to pick an image from Photo Library."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "dfcef6f3-2770-4ef2-9807-0a61457f125a"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/dfcef6f3-2770-4ef2-9807-0a61457f125a"
+    }
   }
 }
