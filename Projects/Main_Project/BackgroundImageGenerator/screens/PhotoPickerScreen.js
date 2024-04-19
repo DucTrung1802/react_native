@@ -17,6 +17,7 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { postImageToServer } from "../backend/http"
 import axios from "axios";
+import NetInfo from "@react-native-community/netinfo";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_SIZE_ACTIVATED_KEYBOARD = SCREEN_WIDTH - 150
@@ -39,6 +40,25 @@ function PhotoPickerScreen({ navigation }) {
     const [inputNegativePrompt, setInputNegativePrompt] = useState("")
 
     const [isKeyboardActive, setIsKeyboardActive] = useState(false);
+
+    const [networkState, setNetworkState] = useState(null);
+
+    useEffect(() => {
+        // Get the network state once
+        NetInfo.fetch().then(state => {
+            setNetworkState(state);
+        });
+
+        // Subscribe to network state updates
+        const unsubscribe = NetInfo.addEventListener(state => {
+            setNetworkState(state);
+        });
+
+        // Unsubscribe from network state updates
+        return () => {
+            unsubscribe();
+        };
+    }, []);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener(
@@ -71,31 +91,6 @@ function PhotoPickerScreen({ navigation }) {
         value = value.replace("\n", "")
         setInputNegativePrompt(value)
     }
-
-    const handleAppStateChange = async (nextAppState) => {
-        if (nextAppState === 'active') {
-            // App has come to the foreground
-            // Call your function here
-            handleAppForeground()
-            await checkClipboard()
-        } else if (nextAppState === 'background') {
-            // App has gone to the background
-            // Call your function here
-            handleAppBackground();
-        }
-    };
-
-    const handleAppForeground = () => {
-        // Add your code to execute when the app is in the foreground
-        // console.log("App is in the foreground");
-        // console.log("");
-    };
-
-    const handleAppBackground = () => {
-        // Add your code to execute when the app is in the background
-        // console.log("App is in the background");
-        // console.log("");
-    };
 
     async function verifyCameraPermissions() {
         const responsePermission = await requestCameraPermission();
@@ -176,6 +171,14 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function generateButtonHandler() {
+        if (!(networkState && networkState.isConnected && networkState.isInternetReachable)) {
+            Alert.alert(
+                'Cannot connect to the Internet!',
+                'Please connect to the Internet to generate images.'
+            )
+            return
+        }
+
         var response;
 
         const source = axios.CancelToken.source();
@@ -320,7 +323,7 @@ function PhotoPickerScreen({ navigation }) {
                     </BottomSheet>
                 </View >
             </GestureHandlerRootView >
-            {isGenerating && <OverlayView onPress={() => { cancelButtonHandler(false) }} />}
+            {isGenerating && networkState && <OverlayView onPress={() => { cancelButtonHandler(false) }} />}
         </View >
     )
 }
