@@ -5,6 +5,7 @@ import { GlobalStyles } from '../constants/styles'
 import {
     StyleSheet, Text, View,
     Image, Alert, TouchableWithoutFeedback,
+    TouchableHighlight,
     Keyboard, Dimensions, ScrollView
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
@@ -245,27 +246,41 @@ function PhotoPickerScreen({ navigation }) {
         }
     }
 
+    function pressImagePlaceholder() {
+        Alert.alert(
+            'Looking for a photo...',
+            'You need to choose a photo before viewing in fullscreen mode.'
+        )
+    }
+
     return (
         <View style={styles.outerContainer}>
             <GestureHandlerRootView style={{ flex: 1 }} >
                 <View style={styles.container}>
-                    <TouchableWithoutFeedback
-                        onPress={handlePressOutside}
-                    >
+                    <TouchableWithoutFeedback onPress={handlePressOutside}>
                         <View style={{
                             ...styles.imagePreviewContainer,
                             height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
-                        }}>
-                            <Image
-                                style={{
-                                    ...styles.imagePreview,
-                                    width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
-                                    height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
+                        }} >
+                            <TouchableHighlight
+                                onPress={() => {
+                                    isKeyboardActive ? handlePressOutside() : appContext.mainImage.uri ?
+                                        navigation.navigate("PhotoFullScreen") : pressImagePlaceholder()
                                 }}
-                                source={
-                                    appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
-                                }
-                            />
+
+                                style={{ borderRadius: 10 }}
+                            >
+                                <Image
+                                    style={{
+                                        ...styles.imagePreview,
+                                        width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                                        height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
+                                    }}
+                                    source={
+                                        appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
+                                    }
+                                />
+                            </TouchableHighlight>
                         </View>
                     </TouchableWithoutFeedback>
                     <ScrollView style={{ ...styles.interactContainer }}>
@@ -335,7 +350,8 @@ function PhotoPickerScreen({ navigation }) {
                     </BottomSheet>
                 </View >
             </GestureHandlerRootView >
-            {isGenerating && <OverlayView onPress={() => { cancelButtonHandler(false) }} />}
+            {isGenerating && <OverlayView onPress={() => { cancelButtonHandler(false) }} />
+            }
         </View >
     )
 }
@@ -401,7 +417,7 @@ const styles = StyleSheet.create({
         marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
-        height: 40,
+        height: 50,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.primary800,
         opacity: 1,
@@ -410,7 +426,7 @@ const styles = StyleSheet.create({
         marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
-        height: 40,
+        height: 50,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.red500,
         marginVertical: 10
@@ -419,7 +435,7 @@ const styles = StyleSheet.create({
         marginHorizontal: "10%",
         justifyContent: "center",
         alignItems: 'center',
-        height: 40,
+        height: 50,
         borderRadius: 10,
         backgroundColor: GlobalStyles.colors.accent500,
         marginVertical: 10

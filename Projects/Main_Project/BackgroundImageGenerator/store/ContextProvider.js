@@ -7,6 +7,8 @@ export const ImageContext = createContext({
     mainImage: {
         uri: null,
         isGenerated: false,
+        height: 0,
+        width: 0,
     },
     imageList: [],
     cancelToken: null,

@@ -50,6 +50,8 @@ function PhotoSelectionContainer({ resetScroll }) {
             var newPhoto = {
                 uri: photo.assets[0].uri,
                 isGenerated: false,
+                height: photo.assets[0].height,
+                width: photo.assets[0].width
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
@@ -60,7 +62,7 @@ function PhotoSelectionContainer({ resetScroll }) {
         let photo = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [1, 1],
+            // aspect: [1, 1],
             quality: 1,
         });
 
@@ -68,6 +70,8 @@ function PhotoSelectionContainer({ resetScroll }) {
             var newPhoto = {
                 uri: photo.assets[0].uri,
                 isGenerated: false,
+                height: photo.assets[0].height,
+                width: photo.assets[0].width
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
@@ -87,6 +91,8 @@ function PhotoSelectionContainer({ resetScroll }) {
                 var newPhoto = {
                     uri: imageUri,
                     isGenerated: false,
+                    height: height,
+                    width: width
                 }
                 await appContext.setMainImageAndAdd(newPhoto)
                 resetScroll()
@@ -103,6 +109,8 @@ function PhotoSelectionContainer({ resetScroll }) {
             var newPhoto = {
                 uri: photo.data,
                 isGenerated: false,
+                height: photo.size.height,
+                width: photo.size.width
             }
             await appContext.setMainImageAndAdd(newPhoto)
             resetScroll()
