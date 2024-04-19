@@ -265,7 +265,7 @@ function PhotoPickerScreen({ navigation }) {
                                 multiline
                                 textAlignVertical='top'
                                 numberOfLines={4}
-                                maxLength={150}
+                                maxLength={350}
                                 placeholder="Describe your background image here..."
                                 value={inputPrompt}
                                 placeholderTextColor="#b3b3b3"
@@ -283,7 +283,7 @@ function PhotoPickerScreen({ navigation }) {
                                 multiline
                                 textAlignVertical='top'
                                 numberOfLines={3}
-                                maxLength={150}
+                                maxLength={350}
                                 placeholder="List what you don't want in your image..."
                                 value={inputNegativePrompt}
                                 placeholderTextColor="#b3b3b3"
