@@ -22,7 +22,7 @@
     "android": {
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon_app.jpeg",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -31,7 +31,7 @@
       "package": "com.ductrung.BackgroundImageGenerator"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon_app.jpeg"
     },
     "plugins": [
       [
