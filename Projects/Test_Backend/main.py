@@ -20,9 +20,10 @@ import hashlib
 import json
 import base64
 from io import BytesIO
+
 from RealESRGAN import RealESRGAN
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 app = FastAPI()
 
@@ -42,7 +43,7 @@ trimap = TrimapGenerator()
 preprocessing = PreprocessingStub()
 
 postprocessing = MattingMethod(
-    matting_module=fba, trimap_generator=trimap, device="cpu"
+    matting_module=fba, trimap_generator=trimap, device=device
 )
 
 interface = Interface(
@@ -97,12 +98,21 @@ def get_mask(image):
     return: bg_remove_res_rgb: Ảnh gốc đã xóa background
     mask_image: ảnh mask
     """
+    log("run bg = interface([image])[0]")
     bg = interface([image])[0]
+
+    log("run bg = np.array(bg)")
     bg = np.array(bg)
+
+    log("run mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))")
     mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
 
+    log("run bg_remove_res_rgb = cv2.cvtColor(np.array(bg), cv2.COLOR_RGBA2RGB)")
     bg_remove_res_rgb = cv2.cvtColor(np.array(bg), cv2.COLOR_RGBA2RGB)
+
+    log("run bg_remove_res_rgb = PIL.Image.fromarray(bg_remove_res_rgb)")
     bg_remove_res_rgb = PIL.Image.fromarray(bg_remove_res_rgb)
+
     return bg_remove_res_rgb, mask_image
 
 
@@ -152,15 +162,25 @@ def predict(prompt, negative_prompt, bg_remove_res_rgb, mask_image):
 def scale_images(bg_remove_res_rgb, mask_image, sd_base64_image_dictionary: dict):
     output_base64_image_dictionary = {}
     for key, value in sd_base64_image_dictionary.items():
-        sr_image = model.predict(value)
+        log("sr_image = model.predict(value)")
+        sr_image = model.predict(decode_image(value))
+        log("sr_image = PIL.Image.composite()")
         sr_image = PIL.Image.composite(
             sr_image,
             bg_remove_res_rgb.resize(sr_image.size),
             mask_image.resize(sr_image.size),
         )
+
+        log("buffered = BytesIO()")
         buffered = BytesIO()
+
+        log("sr_image.save(buffered, format='PNG')")
         sr_image.save(buffered, format="PNG")
+
+        log("img_str = base64.b64encode(buffered.getvalue())")
         img_str = base64.b64encode(buffered.getvalue())
+
+        log("output_base64_image_dictionary[key] = img_str.decode()")
         output_base64_image_dictionary[key] = img_str.decode()
 
     return output_base64_image_dictionary
@@ -177,6 +197,7 @@ async def receive_image(
     img_file: Annotated[UploadFile, File()],
     negative_prompt: Annotated[str, Form()] = "",
 ):
+    log("start processing image")
     # Validate token
     if not await validate_token(token):
         return return_response_handler()
@@ -234,12 +255,14 @@ async def receive_image(
 
         return output_base64_image_dictionary
 
-    except:
+    except Exception as e:
+        print(e)
         log("ERROR - run return_response_handler()")
         return return_response_handler()
 
 
 def main():
+    log("hello")
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
 
 
