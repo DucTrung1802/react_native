@@ -17,6 +17,7 @@ function OverlayView({ onPress }) {
             <View style={styles.overlayContent}>
                 <ActivityIndicator size={70} color="white" />
                 <Text style={styles.waitingText}>Waiting for image generation!</Text>
+                <Text style={styles.waitingText}>Standard waiting time: {IMAGE_GENERATION_TIMEOUT} seconds.</Text>
             </View>
             <TouchableOpacity onPress={onPress} style={{ ...styles.overlayButton, opacity: countdown > 0 ? 0.8 : 1 }} disabled={countdown > 0}>
                 <Text style={styles.buttonText}>{countdown > 0 ? countdown : "Cancel"}</Text>
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)', // Transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0.9)', // Transparent background
     },
     overlayContent: {
         // backgroundColor: 'rgba(255, 255, 255, 0.2)', // Semi-transparent white

@@ -5,9 +5,9 @@ import { GlobalStyles } from '../constants/allConstants'
 import {
     StyleSheet, Text, View,
     Image, Alert, TouchableWithoutFeedback,
-    TouchableHighlight, BackHandler,
-    Keyboard, Dimensions, ScrollView,
-    TouchableOpacity
+    BackHandler, Keyboard, Dimensions,
+    ScrollView, TouchableOpacity,
+    ToastAndroid
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import { useCameraPermissions } from 'expo-image-picker';
@@ -23,10 +23,9 @@ import NetInfo from "@react-native-community/netinfo";
 import * as ScreenOrientation from "expo-screen-orientation";
 
 import { interpolate } from "react-native-reanimated";
-import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
+import Carousel from "react-native-reanimated-carousel";
 
 import SBItem from "../components/SBItem";
-import { window } from "../constants/Window";
 
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -63,9 +62,24 @@ function PhotoPickerScreen({ navigation }) {
 
     const [isGenerated, setIsGenerated] = useState(false)
 
-    const [isResizing, setIsResizing] = useState(false)
-
     const scrollViewRef = useRef();
+
+    const [backPressCount, setBackPressCount] = useState(0);
+
+    const handleBackPress = () => {
+        if (backPressCount === 0) {
+            ToastAndroid.show('Press again to exit', ToastAndroid.SHORT);
+            setBackPressCount(1);
+            setTimeout(() => {
+                setBackPressCount(0);
+            }, 2000); // Change the delay if you want
+            return true;
+        } else {
+            // Exiting the app
+            BackHandler.exitApp();
+            return true;
+        }
+    };
 
     useEffect(() => {
         const rotatePortrait = async () => {
@@ -78,7 +92,12 @@ function PhotoPickerScreen({ navigation }) {
             'hardwareBackPress',
             async () => {
                 await rotatePortrait();
-                return navigation.goBack()
+                if (navigation.canGoBack()) {
+                    navigation.pop()
+                }
+                else {
+                    handleBackPress()
+                }
             }
         );
 
@@ -233,9 +252,7 @@ function PhotoPickerScreen({ navigation }) {
                 resizeImage(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
             }
             else {
-                setIsResizing(true)
                 resizeImage(IMAGE_SIZE_ACTIVATED_KEYBOARD, IMAGE_SIZE_DEACTIVATED_KEYBOARD)
-                setIsResizing(false)
             }
         }
 
@@ -425,7 +442,7 @@ function PhotoPickerScreen({ navigation }) {
                                         navigation.navigate("PhotoFullScreen") : pressImagePlaceholder()
                                 }}
                             >
-                                {!isGenerated && <Image
+                                {(!isGenerated || isKeyboardActive) && <Image
                                     style={{
                                         ...styles.imagePreview,
                                         height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
@@ -437,7 +454,7 @@ function PhotoPickerScreen({ navigation }) {
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
                                 />}
-                                {isGenerated && !isResizing && <Carousel
+                                {isGenerated && !isKeyboardActive && <Carousel
                                     style={{
                                         width: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         height: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
