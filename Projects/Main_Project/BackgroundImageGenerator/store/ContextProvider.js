@@ -10,6 +10,18 @@ export const ImageContext = createContext({
         height: 0,
         width: 0,
     },
+    outputImages: [
+        {
+            index: 0,
+            uri: "",
+            isGenerated: true,
+        },
+        {
+            index: 1,
+            uri: "",
+            isGenerated: true,
+        },
+    ],
     imageList: [],
     cancelToken: null,
     setDisableClipboardButton: (value) => { },
@@ -17,6 +29,7 @@ export const ImageContext = createContext({
     setMainImage: (image) => { },
     setMainImageAndAdd: async (image) => { },
     setCancelToken: async (source) => { },
+    addOutputImage: async (newOutputImage) => { }
 });
 
 function ContextProvider({ children }) {
@@ -25,6 +38,18 @@ function ContextProvider({ children }) {
     const [currentMainImage, setCurrentMainImage] = useState({})
     const [currentImageList, setCurrentImageList] = useState([])
     const [currentCancelToken, setCurrentCancelToken] = useState(null);
+    const [currentOutputImages, setCurrentOutputImages] = useState([
+        // {
+        //     index: 0,
+        //     uri: "https://2.img-dpreview.com/files/p/E~C1000x0S4000x4000T1200x1200~articles/3925134721/0266554465.jpeg",
+        //     isGenerated: true,
+        // },
+        // {
+        //     index: 1,
+        //     uri: "https://fujifilm-x.com/wp-content/uploads/2021/01/gfx100s_sample_04_thum-1.jpg",
+        //     isGenerated: true,
+        // }
+    ])
 
     function setDisableClipboardButton(value) {
         setCurrentDisableClipboardButton(value)
@@ -50,17 +75,23 @@ function ContextProvider({ children }) {
         setCurrentCancelToken(source)
     }
 
+    function addOutputImage(newOutputImage) {
+        setCurrentOutputImages((outputImages) => [...outputImages, newOutputImage])
+    }
+
     const value = {
         disableClipboardButton: currentDisableClipboardButton,
         imageInClipboard: currentImageInClipboard,
         mainImage: currentMainImage,
         imageList: currentImageList,
         cancelToken: currentCancelToken,
+        outputImages: currentOutputImages,
         setDisableClipboardButton: setDisableClipboardButton,
         setImageInClipboard: setImageInClipboard,
         setMainImage: setMainCurrentImage,
         setMainImageAndAdd: setMainCurrentImageAndAddToList,
-        setCancelToken: setCancelToken
+        setCancelToken: setCancelToken,
+        addOutputImage: addOutputImage
     }
 
     return (

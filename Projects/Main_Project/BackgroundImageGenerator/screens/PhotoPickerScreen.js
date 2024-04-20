@@ -35,9 +35,11 @@ const IMAGE_SIZE_DEACTIVATED_KEYBOARD = SCREEN_WIDTH - 40
 
 function PhotoPickerScreen({ navigation }) {
     const appContext = useContext(ImageContext)
+
     const [isGenerating, setIsGenerating] = useState(false)
 
     const imagePlaceholder = require('../assets/image_placeholder.png')
+
     const ref = useRef(null);
 
     const [cameraPermission, requestCameraPermission] =
@@ -58,6 +60,8 @@ function PhotoPickerScreen({ navigation }) {
     const [imageWidth, setImageWidth] = useState(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
 
     const [indexTest, setIndexTest] = useState(0)
+
+    const [isGenerated, setIsGenerated] = useState(false)
 
     useEffect(() => {
         const rotatePortrait = async () => {
@@ -222,9 +226,6 @@ function PhotoPickerScreen({ navigation }) {
     }, [appContext.mainImage.uri, isKeyboardActive])
 
     async function chooseAPhotoHandler() {
-        navigation.navigate("TestScreen")
-        return
-
         const hasPermission = await verifyCameraPermissions();
 
         if (!hasPermission) {
@@ -280,29 +281,40 @@ function PhotoPickerScreen({ navigation }) {
         setIsGenerating(false);
 
         // Post-process response
-        console.log(response?.data["0"]?.slice(0, 300))
+        // console.log(response?.data["0"]?.slice(0, 300))
 
-        if (!response.cancel && response.data && response.data["0"]) {
+        if (!response.cancel && response.data) {
 
-            const filePath = `${FileSystem.documentDirectory}output_image_${String(Date.now())}.png`;
-            await FileSystem.writeAsStringAsync(filePath, response.data["0"], { encoding: "base64" }) // Write binary data to file
-                .then(() => {
-                    console.log('Image saved successfully.');
-                })
-                .catch(error => {
-                    console.error('Error saving image:', error);
-                });
+            Object.keys(response.data).forEach(async (key) => {
+                const filePath = `${FileSystem.documentDirectory}output_image_${String(Date.now())}.png`;
+                await FileSystem.writeAsStringAsync(filePath, response.data[key], { encoding: "base64" }) // Write binary data to file
+                    .then(() => {
+                        console.log(`Image ${key} saved successfully.`);
+                    })
+                    .catch(error => {
+                        console.error(`Error saving image ${key}:`, error);
+                    });
 
-            Image.getSize(filePath, (width, height) => {
-                var newPhoto = {
+                var newOutputImage = {
+                    index: key,
                     uri: filePath,
                     isGenerated: true,
-                    height: height,
-                    width: width
                 }
 
-                appContext.setMainImage(newPhoto)
+                appContext.addOutputImage(newOutputImage)
             });
+
+            setIsGenerated(true)
+
+            Alert.alert(
+                'Successfully!',
+                `We have generated ${Object.keys(response.data).length} images with new background for you.`
+            )
+        }
+        else {
+            if (appContext.cancelToken) {
+                appContext.cancelToken.cancel('Request canceled by user')
+            }
         }
     }
 
@@ -361,12 +373,13 @@ function PhotoPickerScreen({ navigation }) {
                             height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
                         }} >
                             <TouchableOpacity
+                                // style={{ backgroundColor: "red" }}
                                 onPress={() => {
                                     isKeyboardActive ? handlePressOutside() : appContext.mainImage.uri ?
                                         navigation.navigate("PhotoFullScreen") : pressImagePlaceholder()
                                 }}
                             >
-                                {/* <Image
+                                {!isGenerated && <Image
                                     style={{
                                         ...styles.imagePreview,
                                         height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
@@ -377,23 +390,27 @@ function PhotoPickerScreen({ navigation }) {
                                     source={
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
-                                /> */}
-                                <Carousel
+                                />}
+                                {isGenerated && <Carousel
                                     style={{
-                                        width: SCREEN_WIDTH,
-                                        height: 240,
+                                        width: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                                        height: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         justifyContent: "center",
                                         alignItems: "center",
                                     }}
-                                    width={SCREEN_WIDTH * 0.7}
-                                    height={240 * 0.7}
-                                    data={[...new Array(6).keys()]}
-                                    renderItem={({ index }) => {
-                                        return <SBItem key={index} index={index} />;
+                                    width={imageWidth ? imageWidth : IMAGE_SIZE_DEACTIVATED_KEYBOARD}
+                                    height={imageHeight ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD}
+                                    data={[...appContext.outputImages]}
+                                    renderItem={(props) => {
+                                        return <SBItem
+                                            index={props.index}
+                                            uri={props.item.uri}
+                                            height={imageHeight}
+                                            width={imageWidth} />;
                                     }}
-                                    onSnapToItem={(index) => { setIndexTest(index) }}
+                                    onSnapToItem={(index) => { appContext.setMainImage(appContext.outputImages[index]) }}
                                     customAnimation={animationStyle}
-                                />
+                                />}
                             </TouchableOpacity>
                         </View>
                     </TouchableWithoutFeedback>
