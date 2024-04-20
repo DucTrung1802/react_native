@@ -42,7 +42,7 @@ function PhotoSelectionContainer({ resetScroll }) {
 
         const photo = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
-            // aspect: [1, 1],
+            aspect: [1, 1],
             quality: 1,
         })
 
@@ -62,7 +62,7 @@ function PhotoSelectionContainer({ resetScroll }) {
         let photo = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            // aspect: [1, 1],
+            aspect: [1, 1],
             quality: 1,
         });
 

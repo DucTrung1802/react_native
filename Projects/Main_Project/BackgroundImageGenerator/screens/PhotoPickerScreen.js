@@ -140,6 +140,11 @@ function PhotoPickerScreen({ navigation }) {
         };
     }, []);
 
+    useEffect(() => {
+        if (!appContext.mainImage.isGenerated) {
+            setIsGenerated(false)
+        }
+    }, [appContext.mainImage.uri])
 
 
     function onChangeInputPromptTextHandler(value) {
@@ -299,11 +304,11 @@ function PhotoPickerScreen({ navigation }) {
                     var output_height, output_width
                     if (imageHeight >= imageWidth) {
                         output_height = height
-                        output_width = width * height / imageHeight
+                        output_width = imageWidth * height / imageHeight
                     }
                     else {
                         output_width = width
-                        output_height = height * width / imageWidth
+                        output_height = imageHeight * width / imageWidth
                     }
 
                     var newOutputImage = {
@@ -395,7 +400,7 @@ function PhotoPickerScreen({ navigation }) {
                                         navigation.navigate("PhotoFullScreen") : pressImagePlaceholder()
                                 }}
                             >
-                                {!appContext.mainImage.isGenerated && <Image
+                                {!isGenerated && <Image
                                     style={{
                                         ...styles.imagePreview,
                                         height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
@@ -407,7 +412,7 @@ function PhotoPickerScreen({ navigation }) {
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
                                 />}
-                                {appContext.mainImage.isGenerated && <Carousel
+                                {isGenerated && <Carousel
                                     style={{
                                         width: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         height: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
