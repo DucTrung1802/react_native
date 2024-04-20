@@ -42,8 +42,8 @@ function PhotoSelectionContainer({ resetScroll }) {
 
         const photo = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1
+            // aspect: [1, 1],
+            quality: 1,
         })
 
         if (!photo.canceled) {

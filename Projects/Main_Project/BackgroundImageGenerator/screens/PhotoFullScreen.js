@@ -4,8 +4,6 @@ import { ImageContext } from "../store/ContextProvider";
 import CustomButton from "../components/CustomButton";
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ScreenOrientation from "expo-screen-orientation";
-import { AndroidOutputFormat } from "expo-av/build/Audio";
-
 
 function PhotoFullScreen() {
     const appContext = useContext(ImageContext)

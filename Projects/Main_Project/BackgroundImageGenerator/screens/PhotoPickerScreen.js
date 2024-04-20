@@ -46,6 +46,10 @@ function PhotoPickerScreen({ navigation }) {
 
     const [isConnected, setIsConnected] = useState(true);
 
+    const [imageHeight, setImageHeight] = useState(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
+
+    const [imageWidth, setImageWidth] = useState(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
+
     useEffect(() => {
         const rotatePortrait = async () => {
             await ScreenOrientation.lockAsync(
@@ -177,6 +181,37 @@ function PhotoPickerScreen({ navigation }) {
         }
     }
 
+    useEffect(() => {
+        function resizeImage(main_dimensions, sub_dimensions) {
+            var output_height, output_width
+            if (appContext.mainImage.height > appContext.mainImage.width) {
+                output_height = main_dimensions
+                output_width = appContext.mainImage.width * main_dimensions / appContext.mainImage.height
+            }
+            else {
+                output_width = main_dimensions
+                output_height = appContext.mainImage.height * main_dimensions / appContext.mainImage.width
+                if (output_height < sub_dimensions / 2) {
+                    output_width = sub_dimensions
+                    output_height = appContext.mainImage.height * sub_dimensions / appContext.mainImage.width
+                }
+            }
+
+            setImageHeight(output_height)
+            setImageWidth(output_width)
+        }
+
+        if (appContext.mainImage.uri) {
+            if (!isKeyboardActive) {
+                resizeImage(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
+            }
+            else {
+                resizeImage(IMAGE_SIZE_ACTIVATED_KEYBOARD, IMAGE_SIZE_DEACTIVATED_KEYBOARD)
+            }
+        }
+
+    }, [appContext.mainImage.uri, isKeyboardActive])
+
     async function chooseAPhotoHandler() {
         const hasPermission = await verifyCameraPermissions();
 
@@ -302,8 +337,8 @@ function PhotoPickerScreen({ navigation }) {
                                 <Image
                                     style={{
                                         ...styles.imagePreview,
-                                        width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
-                                        height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
+                                        height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                                        width: appContext.mainImage.uri ? imageWidth : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                     }}
                                     source={
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
@@ -406,8 +441,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     imagePreview: {
-        height: 300,
-        width: 300,
         borderRadius: 10,
         borderColor: "white",
         borderWidth: 3,
