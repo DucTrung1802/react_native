@@ -295,13 +295,29 @@ function PhotoPickerScreen({ navigation }) {
                         console.error(`Error saving image ${key}:`, error);
                     });
 
-                var newOutputImage = {
-                    index: key,
-                    uri: filePath,
-                    isGenerated: true,
-                }
+                Image.getSize(filePath, async (width, height) => {
+                    var output_height, output_width
+                    if (imageHeight >= imageWidth) {
+                        output_height = height
+                        output_width = width * height / imageHeight
+                    }
+                    else {
+                        output_width = width
+                        output_height = height * width / imageWidth
+                    }
 
-                appContext.addOutputImage(newOutputImage)
+                    var newOutputImage = {
+                        index: key,
+                        uri: filePath,
+                        isGenerated: true,
+                        height: output_height,
+                        width: output_width
+                    }
+                    appContext.addOutputImage(newOutputImage)
+
+                }, (error) => {
+                    console.error('Error getting image size:', error);
+                });
             });
 
             setIsGenerated(true)
@@ -379,7 +395,7 @@ function PhotoPickerScreen({ navigation }) {
                                         navigation.navigate("PhotoFullScreen") : pressImagePlaceholder()
                                 }}
                             >
-                                {!isGenerated && <Image
+                                {!appContext.mainImage.isGenerated && <Image
                                     style={{
                                         ...styles.imagePreview,
                                         height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
@@ -391,7 +407,7 @@ function PhotoPickerScreen({ navigation }) {
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
                                 />}
-                                {isGenerated && <Carousel
+                                {appContext.mainImage.isGenerated && <Carousel
                                     style={{
                                         width: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         height: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
