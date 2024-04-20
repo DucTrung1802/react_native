@@ -1,11 +1,5 @@
 import React from "react";
 import {
-    StyleProp,
-    ViewStyle,
-    ImageURISource,
-    ImageSourcePropType,
-} from "react-native";
-import {
     StyleSheet,
     View,
     ActivityIndicator,

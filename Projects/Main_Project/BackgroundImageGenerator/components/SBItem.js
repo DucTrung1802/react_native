@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { View, Image, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { LongPressGestureHandler, State } from "react-native-gesture-handler";
+import React from "react";
+import { Image, StyleSheet } from "react-native";
 import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 
 const SBItem = ({ index, uri, height, width }) => {

@@ -1,7 +1,5 @@
 import React from "react";
-import { StyleProp, ViewStyle } from "react-native";
 import { StyleSheet, Text, View } from "react-native";
-
 
 export const SBTextItem = ({ style, index }) => {
     return (

@@ -7,7 +7,6 @@ import {
     Image, Alert, TouchableWithoutFeedback,
     BackHandler, Keyboard, Dimensions,
     ScrollView, TouchableOpacity,
-    ToastAndroid
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import { useCameraPermissions } from 'expo-image-picker';
@@ -26,6 +25,7 @@ import { interpolate } from "react-native-reanimated";
 import Carousel from "react-native-reanimated-carousel";
 
 import SBItem from "../components/SBItem";
+
 
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -64,23 +64,6 @@ function PhotoPickerScreen({ navigation }) {
 
     const scrollViewRef = useRef();
 
-    const [backPressCount, setBackPressCount] = useState(0);
-
-    const handleBackPress = () => {
-        if (backPressCount === 0) {
-            ToastAndroid.show('Press again to exit', ToastAndroid.SHORT);
-            setBackPressCount(1);
-            setTimeout(() => {
-                setBackPressCount(0);
-            }, 2000); // Change the delay if you want
-            return true;
-        } else {
-            // Exiting the app
-            BackHandler.exitApp();
-            return true;
-        }
-    };
-
     useEffect(() => {
         const rotatePortrait = async () => {
             await ScreenOrientation.lockAsync(
@@ -95,15 +78,11 @@ function PhotoPickerScreen({ navigation }) {
                 if (navigation.canGoBack()) {
                     navigation.pop()
                 }
-                else {
-                    handleBackPress()
-                }
             }
         );
 
         return () => backHandler.remove();
     }, []);
-
 
     useEffect(() => {
         async function rotatePortrait() {

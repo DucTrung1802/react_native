@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Image, Dimensions } from "react-native"
-import React, { useContext, useEffect, useState } from 'react';
+import { View, StyleSheet, Image, Dimensions } from "react-native"
+import React, { useContext, useState } from 'react';
 import { ImageContext } from "../store/ContextProvider";
 import CustomButton from "../components/CustomButton";
 import { MaterialIcons } from '@expo/vector-icons';
