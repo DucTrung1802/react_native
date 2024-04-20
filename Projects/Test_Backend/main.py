@@ -40,14 +40,9 @@ postprocessing = MattingMethod(
     matting_module=fba, trimap_generator=trimap, device="cpu"
 )
 
-carvekit_processor = Interface(
+interface = Interface(
     pre_pipe=preprocessing, post_pipe=postprocessing, seg_pipe=seg_net
 )
-
-
-def initialize_model():
-    global carvekit_processor
-    pass
 
 
 class Request(BaseModel):
@@ -87,11 +82,18 @@ def return_response_handler():
     return False
 
 
-def get_mask(input_image):
-    rmbg_image = carvekit_processor([input_image.resize((2048, 2048))])[0]
-    bg = np.array(rmbg_image)
+def get_mask(image):
+    """
+    return: bg_remove_res_rgb: Ảnh gốc đã xóa background
+    mask_image: ảnh mask
+    """
+    bg = interface([image])[0]
+    bg = np.array(bg)
     mask_image = PIL.Image.fromarray(cv2.bitwise_not(bg[:, :, 3]))
-    return mask_image
+
+    bg_remove_res_rgb = cv2.cvtColor(np.array(bg), cv2.COLOR_RGBA2RGB)
+    bg_remove_res_rgb = PIL.Image.fromarray(bg_remove_res_rgb)
+    return bg_remove_res_rgb, mask_image
 
 
 # helper image utils
@@ -102,14 +104,14 @@ def encode_image(image_path):
     return result
 
 
-def predict(prompt, negative_prompt, image_path, mask_image_path):
-    image = encode_image(image_path)
+def predict(prompt, negative_prompt, rmbg_image_path, mask_image_path):
+    rmbg_image = encode_image(rmbg_image_path)
     mask_image = encode_image(mask_image_path)
 
     # prepare sample payload
     request = {
         "inputs": prompt,
-        "image": image,
+        "image": rmbg_image,
         "mask_image": mask_image,
         "negative_prompt": negative_prompt,
         "num_images": 1,
@@ -133,8 +135,8 @@ def predict(prompt, negative_prompt, image_path, mask_image_path):
 async def receive_image(
     token: Annotated[str, Form()],
     prompt: Annotated[str, Form()],
-    negative_prompt: Annotated[str, Form()],
     img_file: Annotated[UploadFile, File()],
+    negative_prompt: Annotated[str, Form()] = "",
 ):
     # Validate token
     if not await validate_token(token):
@@ -160,23 +162,25 @@ async def receive_image(
         input_image = PIL.Image.open(input_image_path)
 
         # Generate mask
-        image_mask = get_mask(input_image)
+        rmbg_image, image_mask = get_mask(input_image)
 
-        # Save image mask (DEBUG)
-        image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask" + ".png"
+        rmbg_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg.png"
+        rmbg_image.save(rmbg_image_path)
+
+        image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask.png"
         image_mask.save(image_mask_path)
 
         output_base64_image_dictionary = predict(
-            prompt, negative_prompt, input_image_path, image_mask_path
+            prompt, negative_prompt, rmbg_image_path, image_mask_path
         )
 
         return output_base64_image_dictionary
+
     except:
         return return_response_handler()
 
 
 def main():
-    initialize_model()
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
 
 
