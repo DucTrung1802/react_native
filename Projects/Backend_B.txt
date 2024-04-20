@@ -1,0 +1,1 @@
+https://huggingface.co/HieuPM/stable-diffusion-2-1-inpainting/tree/main
