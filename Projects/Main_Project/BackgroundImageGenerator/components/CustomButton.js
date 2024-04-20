@@ -1,10 +1,10 @@
 import { StyleSheet, TouchableOpacity, Text } from "react-native";
 
-function CustomButton({ icon, text, onPress, buttonStyle, buttonTextStyle, disabled }) {
+function CustomButton({ icon, text, onPress, buttonStyle, buttonTextStyle, disabled, hasText = true }) {
     return (
         <TouchableOpacity style={{ ...buttonStyle }} onPress={onPress} disabled={disabled}>
             {icon}
-            <Text style={{ ...buttonTextStyle }}>{text}</Text>
+            {hasText && <Text style={{ ...buttonTextStyle }}>{text}</Text>}
         </TouchableOpacity>
     )
 }

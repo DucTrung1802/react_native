@@ -5,7 +5,7 @@ import { GlobalStyles } from '../constants/styles'
 import {
     StyleSheet, Text, View,
     Image, Alert, TouchableWithoutFeedback,
-    TouchableHighlight,
+    TouchableHighlight, BackHandler,
     Keyboard, Dimensions, ScrollView
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
@@ -19,6 +19,8 @@ import * as MediaLibrary from 'expo-media-library';
 import { postImageToServer } from "../backend/http"
 import axios from "axios";
 import NetInfo from "@react-native-community/netinfo";
+import * as ScreenOrientation from "expo-screen-orientation";
+
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_SIZE_ACTIVATED_KEYBOARD = SCREEN_WIDTH - 150
@@ -43,6 +45,34 @@ function PhotoPickerScreen({ navigation }) {
     const [isKeyboardActive, setIsKeyboardActive] = useState(false);
 
     const [isConnected, setIsConnected] = useState(true);
+
+    useEffect(() => {
+        const rotatePortrait = async () => {
+            await ScreenOrientation.lockAsync(
+                ScreenOrientation.OrientationLock.PORTRAIT_UP
+            );
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            async () => {
+                await rotatePortrait();
+                return navigation.goBack()
+            }
+        );
+
+        return () => backHandler.remove();
+    }, []);
+
+
+    useEffect(() => {
+        async function rotatePortrait() {
+            await ScreenOrientation.lockAsync(
+                ScreenOrientation.OrientationLock.PORTRAIT_UP
+            );
+        }
+        rotatePortrait();
+    }, []); // 
 
     useEffect(() => {
         // Get the network state once
@@ -148,7 +178,6 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function chooseAPhotoHandler() {
-        // console.log('Vertical dimension of the screen:', SCREEN_HEIGHT);
         const hasPermission = await verifyCameraPermissions();
 
         if (!hasPermission) {
