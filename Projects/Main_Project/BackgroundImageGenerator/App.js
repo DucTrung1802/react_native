@@ -8,7 +8,6 @@ import { GlobalStyles } from './constants/allConstants';
 import PhotoPickerScreen from './screens/PhotoPickerScreen';
 import PhotoFullScreen from './screens/PhotoFullScreen';
 import ContextProvider from './store/ContextProvider';
-import TestScreen from './screens/TestScreen';
 
 SplashScreen.preventAutoHideAsync();
 setTimeout(SplashScreen.hideAsync, 1000);
@@ -37,12 +36,6 @@ export default function App() {
                         <Stack.Screen
                             name="PhotoFullScreen"
                             component={PhotoFullScreen}
-                            options={{
-                                headerShown: false,
-                            }} />
-                        <Stack.Screen
-                            name="TestScreen"
-                            component={TestScreen}
                             options={{
                                 headerShown: false,
                             }} />

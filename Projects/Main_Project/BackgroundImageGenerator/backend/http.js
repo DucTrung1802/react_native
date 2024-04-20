@@ -48,34 +48,32 @@ export async function postImageToServer(image, prompt, nagativePrompt, cancelTok
     const backend_ip = String(response.data.ip)
 
     // Get token
+    console.log(`http.js : 51 : start forming payload : ${Date().toLocaleString()}`)
     const token = sha256(backend_ip)
     formData.append("token", token)
     formData.append("prompt", prompt.trim())
     formData.append("negative_prompt", nagativePrompt.trim())
 
-    if (image.isImageByte) {
-        const base64Image = image.imageBytes
-        const blob = base64ToBlob(base64Image, 'image/png')
-        const imgName = "input_image_" + String(Date.now()) + ".png"
-        formData.append('img_file', blob, imgName);
-    } else {
-        const extension = image.uri.split('.').pop().toLowerCase();
-        const imgType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
-        const imgName = "input_image_" + String(Date.now()) + "." + extension
+    const extension = "png";
+    const imgType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
+    const imgName = "input_image_" + String(Date.now()) + "." + extension
 
-        formData.append("img_file", {
-            uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
-            type: imgType,
-            name: imgName,
-        })
-    }
+    formData.append("img_file", {
+        uri: Platform.OS === 'android' ? image.uri : image.uri.replace('file://', ''),
+        type: imgType,
+        name: imgName,
+    })
+
+    console.log(`http.js : 73 : finish forming payload : ${Date().toLocaleString()}`)
 
     try {
+        console.log(`http.js : 76 : start sending request : ${Date().toLocaleString()}`)
         response = await axios.post(backend_ip + API_ROUTE, formData,
             {
                 headers: { "Content-Type": "multipart/form-data", },
                 cancelToken: cancelTokenSource.token
             })
+        console.log(`http.js : 82 : finish sending request : ${Date().toLocaleString()}`)
         return response
     } catch (error) {
         if (axios.isCancel(error)) {
@@ -83,6 +81,7 @@ export async function postImageToServer(image, prompt, nagativePrompt, cancelTok
             return { "cancel": true }
         } else {
             console.log('Error:', error);
+            return { "error": true }
         }
 
     }

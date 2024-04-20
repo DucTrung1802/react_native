@@ -63,6 +63,10 @@ function PhotoPickerScreen({ navigation }) {
 
     const [isGenerated, setIsGenerated] = useState(false)
 
+    const [isResizing, setIsResizing] = useState(false)
+
+    const scrollViewRef = useRef();
+
     useEffect(() => {
         const rotatePortrait = async () => {
             await ScreenOrientation.lockAsync(
@@ -146,6 +150,9 @@ function PhotoPickerScreen({ navigation }) {
         }
     }, [appContext.mainImage.uri])
 
+    const scrollToTop = () => {
+        scrollViewRef.current.scrollTo({ y: 0, animated: true });
+    };
 
     function onChangeInputPromptTextHandler(value) {
         value = value.replace("\n", "")
@@ -219,12 +226,16 @@ function PhotoPickerScreen({ navigation }) {
             setImageWidth(output_width)
         }
 
+        scrollToTop()
+
         if (appContext.mainImage.uri) {
             if (!isKeyboardActive) {
                 resizeImage(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
             }
             else {
+                setIsResizing(true)
                 resizeImage(IMAGE_SIZE_ACTIVATED_KEYBOARD, IMAGE_SIZE_DEACTIVATED_KEYBOARD)
+                setIsResizing(false)
             }
         }
 
@@ -266,6 +277,7 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     async function generateButtonHandler() {
+        console.log(`PhotoPickerScreen.js : 269 : start generating : ${Date().toLocaleString()}`)
         if (!isConnected) {
             Alert.alert(
                 'Cannot connect to the Internet!',
@@ -280,7 +292,7 @@ function PhotoPickerScreen({ navigation }) {
         await appContext.setCancelToken(source)
 
         setIsGenerating(true);
-        while (!response && isConnected) {
+        while (isConnected && !response && !response?.error) {
             response = await postImageToServer(appContext.mainImage, inputPrompt, inputNegativePrompt, source);
         }
         setIsGenerating(false);
@@ -290,6 +302,7 @@ function PhotoPickerScreen({ navigation }) {
 
         if (!response.cancel && response.data) {
 
+            var isResult = false
             Object.keys(response.data).forEach(async (key) => {
                 const filePath = `${FileSystem.documentDirectory}output_image_${String(Date.now())}.png`;
                 await FileSystem.writeAsStringAsync(filePath, response.data[key], { encoding: "base64" }) // Write binary data to file
@@ -320,21 +333,33 @@ function PhotoPickerScreen({ navigation }) {
                     }
                     appContext.addOutputImage(newOutputImage)
 
+                    if (!isResult) {
+                        appContext.setMainImage(newOutputImage)
+                        isResult = true
+                    }
+
                 }, (error) => {
                     console.error('Error getting image size:', error);
                 });
             });
 
             setIsGenerated(true)
+            console.log(`PhotoPickerScreen.js : 330 : finish generating outputs : ${Date().toLocaleString()}`)
 
             Alert.alert(
                 'Successfully!',
-                `We have generated ${Object.keys(response.data).length} images with new background for you.`
+                `We have generated ${Object.keys(response.data).length} images with new background for you. Swipe to see more images.`
             )
         }
         else {
             if (appContext.cancelToken) {
                 appContext.cancelToken.cancel('Request canceled by user')
+            }
+            else if (response?.error) {
+                Alert.alert(
+                    'Error!',
+                    `Unfortunately, error has occur!`
+                )
             }
         }
     }
@@ -412,7 +437,7 @@ function PhotoPickerScreen({ navigation }) {
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
                                 />}
-                                {isGenerated && <Carousel
+                                {isGenerated && !isResizing && <Carousel
                                     style={{
                                         width: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         height: IMAGE_SIZE_DEACTIVATED_KEYBOARD,
@@ -435,7 +460,7 @@ function PhotoPickerScreen({ navigation }) {
                             </TouchableOpacity>
                         </View>
                     </TouchableWithoutFeedback>
-                    <ScrollView style={{ ...styles.interactContainer }}>
+                    <ScrollView ref={scrollViewRef} style={{ ...styles.interactContainer }}>
                         <View style={{ height: 10 }}>
                         </View>
                         {appContext.mainImage.uri && <View style={styles.titleContainer}>
