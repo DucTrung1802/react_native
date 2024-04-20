@@ -166,6 +166,10 @@ def scale_images(bg_remove_res_rgb, mask_image, sd_base64_image_dictionary: dict
     return output_base64_image_dictionary
 
 
+def log(content: str):
+    print("INFO: " + str(content).upper())
+
+
 @app.post("/post_request")
 async def receive_image(
     token: Annotated[str, Form()],
@@ -177,11 +181,17 @@ async def receive_image(
     if not await validate_token(token):
         return return_response_handler()
 
+    log("token is validate")
+
     # Validate input image
     if img_file.content_type.split("/")[0] != "image":
         return return_response_handler()
 
+    log("input image is validate")
+
     # Write image file
+    log("Start writing image")
+
     image_name, image_extension = img_file.filename.split(".")
 
     input_image_path: str = "./images/" + image_name + "." + image_extension
@@ -193,11 +203,15 @@ async def receive_image(
     if not os.path.exists(input_image_path):
         return return_response_handler()
 
+    log("Image is written successfully")
+
     try:
         input_image = PIL.Image.open(input_image_path)
 
         # Generate mask
+        log("start get_mask()")
         bg_remove_res_rgb, image_mask = get_mask(input_image)
+        log("complete get_mask()")
 
         # For DEBUG only
         # bg_remove_res_rgb_path = input_image_path.rsplit(".", 1)[0] + "_rmbg.png"
@@ -206,17 +220,22 @@ async def receive_image(
         # image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask.png"
         # image_mask.save(image_mask_path)
 
+        log("start predict()")
         sd_base64_image_dictionary = predict(
             prompt, negative_prompt, bg_remove_res_rgb, image_mask
         )
+        log("complete predict()")
 
+        log("start scale_images()")
         output_base64_image_dictionary = scale_images(
             bg_remove_res_rgb, image_mask, sd_base64_image_dictionary
         )
+        log("complete scale_images()")
 
         return output_base64_image_dictionary
 
     except:
+        log("ERROR - run return_response_handler()")
         return return_response_handler()
 
 
