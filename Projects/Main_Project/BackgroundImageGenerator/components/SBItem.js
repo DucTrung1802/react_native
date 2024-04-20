@@ -27,15 +27,15 @@ const SBItem = (props) => {
     };
 
     return (
-        <LongPressGestureHandler onHandlerStateChange={handleStateChange}>
-            <Animated.View testID={testID} style={{ flex: 1, opacity: opacity }}>
-                {isPretty || img ? (
-                    <SBImageItem style={style} index={index} showIndex={typeof index === "number" && showIndex} img={img} />
-                ) : (
-                    <SBTextItem style={style} index={index} />
-                )}
-            </Animated.View>
-        </LongPressGestureHandler>
+        // <LongPressGestureHandler onHandlerStateChange={handleStateChange}>
+        <Animated.View testID={testID} style={{ flex: 1, opacity: opacity }}>
+            {isPretty || img ? (
+                <SBImageItem style={style} index={index} showIndex={typeof index === "number" && showIndex} img={img} />
+            ) : (
+                <SBTextItem style={style} index={index} />
+            )}
+        </Animated.View>
+        // </LongPressGestureHandler>
     );
 };
 

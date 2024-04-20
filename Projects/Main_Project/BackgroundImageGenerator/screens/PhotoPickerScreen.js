@@ -6,7 +6,8 @@ import {
     StyleSheet, Text, View,
     Image, Alert, TouchableWithoutFeedback,
     TouchableHighlight, BackHandler,
-    Keyboard, Dimensions, ScrollView
+    Keyboard, Dimensions, ScrollView,
+    TouchableOpacity
 } from 'react-native';
 import PhotoSelectionContainer from "../components/PhotoSelectionContainer"
 import { useCameraPermissions } from 'expo-image-picker';
@@ -20,6 +21,12 @@ import { postImageToServer } from "../backend/http"
 import axios from "axios";
 import NetInfo from "@react-native-community/netinfo";
 import * as ScreenOrientation from "expo-screen-orientation";
+
+import { interpolate } from "react-native-reanimated";
+import Carousel, { TAnimationStyle } from "react-native-reanimated-carousel";
+
+import SBItem from "../components/SBItem";
+import { window } from "../constants/Window";
 
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -49,6 +56,8 @@ function PhotoPickerScreen({ navigation }) {
     const [imageHeight, setImageHeight] = useState(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
 
     const [imageWidth, setImageWidth] = useState(IMAGE_SIZE_DEACTIVATED_KEYBOARD)
+
+    const [indexTest, setIndexTest] = useState(0)
 
     useEffect(() => {
         const rotatePortrait = async () => {
@@ -318,11 +327,29 @@ function PhotoPickerScreen({ navigation }) {
     }
 
     function pressImagePlaceholder() {
+        console.log("Choose", indexTest)
         Alert.alert(
             'Looking for a photo...',
             'You need to choose a photo before viewing in fullscreen mode.'
         )
     }
+
+    const animationStyle = useCallback(
+        (value) => {
+            "worklet";
+
+            const zIndex = interpolate(value, [-1, 0, 1], [10, 20, 30]);
+            const scale = interpolate(value, [-1, 0, 1], [1.25, 1, 0.25]);
+            const opacity = interpolate(value, [-0.75, 0, 1], [0, 1, 0]);
+
+            return {
+                transform: [{ scale }],
+                zIndex,
+                opacity,
+            };
+        },
+        [],
+    );
 
     return (
         <View style={styles.outerContainer}>
@@ -333,15 +360,13 @@ function PhotoPickerScreen({ navigation }) {
                             ...styles.imagePreviewContainer,
                             height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD
                         }} >
-                            <TouchableHighlight
+                            <TouchableOpacity
                                 onPress={() => {
                                     isKeyboardActive ? handlePressOutside() : appContext.mainImage.uri ?
                                         navigation.navigate("PhotoFullScreen") : pressImagePlaceholder()
                                 }}
-
-                                style={{ borderRadius: 10 }}
                             >
-                                <Image
+                                {/* <Image
                                     style={{
                                         ...styles.imagePreview,
                                         height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
@@ -352,8 +377,24 @@ function PhotoPickerScreen({ navigation }) {
                                     source={
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
                                     }
+                                /> */}
+                                <Carousel
+                                    style={{
+                                        width: SCREEN_WIDTH,
+                                        height: 240,
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
+                                    width={SCREEN_WIDTH * 0.7}
+                                    height={240 * 0.7}
+                                    data={[...new Array(6).keys()]}
+                                    renderItem={({ index }) => {
+                                        return <SBItem key={index} index={index} />;
+                                    }}
+                                    onSnapToItem={(index) => { setIndexTest(index) }}
+                                    customAnimation={animationStyle}
                                 />
-                            </TouchableHighlight>
+                            </TouchableOpacity>
                         </View>
                     </TouchableWithoutFeedback>
                     <ScrollView style={{ ...styles.interactContainer }}>
@@ -515,5 +556,5 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: 'bold',
         fontSize: 18,
-    }
+    },
 });

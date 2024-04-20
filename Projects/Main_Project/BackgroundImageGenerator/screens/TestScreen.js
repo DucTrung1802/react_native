@@ -29,7 +29,6 @@ function TestScreen() {
     return (
         <View style={{ flex: 1 }}>
             <Carousel
-                loop
                 style={{
                     width: PAGE_WIDTH,
                     height: 240,
