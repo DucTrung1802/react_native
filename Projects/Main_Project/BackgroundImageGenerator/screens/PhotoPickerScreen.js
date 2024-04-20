@@ -268,7 +268,7 @@ function PhotoPickerScreen({ navigation }) {
         setIsGenerating(false);
 
         // Post-process response
-        // console.log(response)
+        console.log(response?.data["0"]?.slice(0, 300))
 
         if (!response.cancel && response.data && response.data["0"]) {
 
@@ -281,12 +281,16 @@ function PhotoPickerScreen({ navigation }) {
                     console.error('Error saving image:', error);
                 });
 
-            var newPhoto = {
-                uri: filePath,
-                isGenerated: true,
-            }
+            Image.getSize(filePath, (width, height) => {
+                var newPhoto = {
+                    uri: filePath,
+                    isGenerated: true,
+                    height: height,
+                    width: width
+                }
 
-            appContext.setMainImage(newPhoto)
+                appContext.setMainImage(newPhoto)
+            });
         }
     }
 
@@ -339,6 +343,8 @@ function PhotoPickerScreen({ navigation }) {
                                         ...styles.imagePreview,
                                         height: appContext.mainImage.uri ? imageHeight : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                         width: appContext.mainImage.uri ? imageWidth : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                                        // height: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
+                                        // width: isKeyboardActive ? IMAGE_SIZE_ACTIVATED_KEYBOARD : IMAGE_SIZE_DEACTIVATED_KEYBOARD,
                                     }}
                                     source={
                                         appContext.mainImage.uri ? { uri: appContext.mainImage.uri } : imagePlaceholder
