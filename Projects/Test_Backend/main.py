@@ -142,7 +142,7 @@ def predict(prompt, negative_prompt, bg_remove_res_rgb, mask_image):
         "image": bg_remove_res_rgb_str,
         "mask_image": mask_image_str,
         "negative_prompt": negative_prompt,
-        "num_images": 1,
+        "num_images": 4,
     }
 
     # headers
@@ -163,6 +163,7 @@ def scale_images(bg_remove_res_rgb, mask_image, sd_base64_image_dictionary: dict
     output_base64_image_dictionary = {}
     for key, value in sd_base64_image_dictionary.items():
         log("sr_image = model.predict(value)")
+        print(f"base64_str: {value[:200]}")
         sr_image = model.predict(decode_image(value))
         log("sr_image = PIL.Image.composite()")
         sr_image = PIL.Image.composite(
