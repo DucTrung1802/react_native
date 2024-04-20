@@ -110,15 +110,15 @@ function PhotoPickerScreen({ navigation }) {
         };
     }, []);
 
-    useEffect(() => {
-        if (!isConnected) {
-            setIsGenerating(false)
-            Alert.alert(
-                'Cannot connect to the Internet!',
-                'Please connect to the Internet to generate images.'
-            )
-        }
-    }, [isConnected]);
+    // useEffect(() => {
+    //     if (!isConnected) {
+    //         setIsGenerating(false)
+    //         Alert.alert(
+    //             'Cannot connect to the Internet!',
+    //             'Please connect to the Internet to generate images.'
+    //         )
+    //     }
+    // }, [isConnected]);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener(
