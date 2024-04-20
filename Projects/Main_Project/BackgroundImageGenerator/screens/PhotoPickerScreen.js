@@ -213,6 +213,9 @@ function PhotoPickerScreen({ navigation }) {
     }, [appContext.mainImage.uri, isKeyboardActive])
 
     async function chooseAPhotoHandler() {
+        navigation.navigate("TestScreen")
+        return
+
         const hasPermission = await verifyCameraPermissions();
 
         if (!hasPermission) {

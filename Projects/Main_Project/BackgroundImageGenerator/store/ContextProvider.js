@@ -1,5 +1,5 @@
 import { createContext, useState } from 'react';
-import { MAX_IMAGE_STORE } from '../constants/styles';
+import { MAX_IMAGE_STORE } from '../constants/allConstants';
 
 export const ImageContext = createContext({
     disableClipboardButton: true,
