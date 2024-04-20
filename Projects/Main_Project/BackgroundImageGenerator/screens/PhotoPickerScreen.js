@@ -288,7 +288,7 @@ function PhotoPickerScreen({ navigation }) {
         await appContext.setCancelToken(source)
 
         setIsGenerating(true);
-        while (isConnected && !response && !response?.error) {
+        while (isConnected && !response) {
             response = await postImageToServer(appContext.mainImage, inputPrompt, inputNegativePrompt, source);
         }
         setIsGenerating(false);
@@ -350,12 +350,6 @@ function PhotoPickerScreen({ navigation }) {
         else {
             if (appContext.cancelToken) {
                 appContext.cancelToken.cancel('Request canceled by user')
-            }
-            else if (response?.error) {
-                Alert.alert(
-                    'Error!',
-                    `Unfortunately, error has occur!`
-                )
             }
         }
     }
