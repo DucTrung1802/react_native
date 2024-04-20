@@ -5,6 +5,7 @@ import os
 from typing import Annotated
 import numpy as np
 import cv2
+import torch
 
 import PIL.Image
 from carvekit.api.interface import Interface
@@ -17,8 +18,11 @@ from carvekit.trimap.generator import TrimapGenerator
 import requests
 import hashlib
 import json
-
 import base64
+from io import BytesIO
+from RealESRGAN import RealESRGAN
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 app = FastAPI()
 
@@ -28,9 +32,10 @@ VALIDATE_TOKEN_URL = (
 ENDPOINT_URL = "https://sb6zn2j49353q6uf.us-east-1.aws.endpoints.huggingface.cloud"
 HF_TOKEN = "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"
 
-seg_net = TracerUniversalB7(device="cpu", batch_size=1)
+# Carvekit model initialization
+seg_net = TracerUniversalB7(device=device, batch_size=1)
 
-fba = FBAMatting(device="cpu", input_tensor_size=2048, batch_size=1)
+fba = FBAMatting(device=device, input_tensor_size=2048, batch_size=1)
 
 trimap = TrimapGenerator()
 
@@ -43,6 +48,11 @@ postprocessing = MattingMethod(
 interface = Interface(
     pre_pipe=preprocessing, post_pipe=postprocessing, seg_pipe=seg_net
 )
+
+# RealESRGAN model initialization
+model = RealESRGAN(device, scale=4)
+
+model.load_weights("weights/RealESRGAN_x4.pth", download=True)
 
 
 class Request(BaseModel):
@@ -97,22 +107,30 @@ def get_mask(image):
 
 
 # helper image utils
-def encode_image(image_path):
-    with open(image_path, "rb") as i:
-        b64 = base64.b64encode(i.read())
-        result = b64.decode("utf-8")
+def encode_image(image):
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    b64 = base64.b64encode(buffered.getvalue())
+    result = b64.decode("utf-8")
     return result
 
 
-def predict(prompt, negative_prompt, rmbg_image_path, mask_image_path):
-    rmbg_image = encode_image(rmbg_image_path)
-    mask_image = encode_image(mask_image_path)
+def decode_image(img_str):
+    base64_image = base64.b64decode(img_str)
+    buffer = BytesIO(base64_image)
+    image = PIL.Image.open(buffer)
+    return image
+
+
+def predict(prompt, negative_prompt, bg_remove_res_rgb, mask_image):
+    bg_remove_res_rgb_str = encode_image(bg_remove_res_rgb)
+    mask_image_str = encode_image(mask_image)
 
     # prepare sample payload
     request = {
         "inputs": prompt,
-        "image": rmbg_image,
-        "mask_image": mask_image,
+        "image": bg_remove_res_rgb_str,
+        "mask_image": mask_image_str,
         "negative_prompt": negative_prompt,
         "num_images": 1,
     }
@@ -129,6 +147,23 @@ def predict(prompt, negative_prompt, rmbg_image_path, mask_image_path):
     img_dict = json.loads(response.content.decode())
 
     return img_dict
+
+
+def scale_images(bg_remove_res_rgb, mask_image, sd_base64_image_dictionary: dict):
+    output_base64_image_dictionary = {}
+    for key, value in sd_base64_image_dictionary.items():
+        sr_image = model.predict(value)
+        sr_image = PIL.Image.composite(
+            sr_image,
+            bg_remove_res_rgb.resize(sr_image.size),
+            mask_image.resize(sr_image.size),
+        )
+        buffered = BytesIO()
+        sr_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue())
+        output_base64_image_dictionary[key] = img_str.decode()
+
+    return output_base64_image_dictionary
 
 
 @app.post("/post_request")
@@ -162,16 +197,21 @@ async def receive_image(
         input_image = PIL.Image.open(input_image_path)
 
         # Generate mask
-        rmbg_image, image_mask = get_mask(input_image)
+        bg_remove_res_rgb, image_mask = get_mask(input_image)
 
-        rmbg_image_path = input_image_path.rsplit(".", 1)[0] + "_rmbg.png"
-        rmbg_image.save(rmbg_image_path)
+        # For DEBUG only
+        # bg_remove_res_rgb_path = input_image_path.rsplit(".", 1)[0] + "_rmbg.png"
+        # bg_remove_res_rgb.save(bg_remove_res_rgb_path)
 
-        image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask.png"
-        image_mask.save(image_mask_path)
+        # image_mask_path = input_image_path.rsplit(".", 1)[0] + "_mask.png"
+        # image_mask.save(image_mask_path)
 
-        output_base64_image_dictionary = predict(
-            prompt, negative_prompt, rmbg_image_path, image_mask_path
+        sd_base64_image_dictionary = predict(
+            prompt, negative_prompt, bg_remove_res_rgb, image_mask
+        )
+
+        output_base64_image_dictionary = scale_images(
+            bg_remove_res_rgb, image_mask, sd_base64_image_dictionary
         )
 
         return output_base64_image_dictionary
