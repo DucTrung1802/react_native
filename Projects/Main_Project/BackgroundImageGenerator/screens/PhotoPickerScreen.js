@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useRef, useEffect, useState } from 'react';
 import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
 import BottomSheet from '../components/BottomSheet';
-import { GlobalStyles } from '../constants/styles'
+import { GlobalStyles } from '../constants/allConstants'
 import {
     StyleSheet, Text, View,
     Image, Alert, TouchableWithoutFeedback,

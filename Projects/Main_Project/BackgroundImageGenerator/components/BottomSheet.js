@@ -10,7 +10,7 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
-import { GlobalStyles } from "../constants/styles"
+import { GlobalStyles } from "../constants/allConstants"
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 

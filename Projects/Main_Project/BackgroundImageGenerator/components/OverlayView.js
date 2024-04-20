@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { GlobalStyles, IMAGE_GENERATION_TIMEOUT } from '../constants/styles';
+import { GlobalStyles, IMAGE_GENERATION_TIMEOUT } from '../constants/allConstants';
 
 function OverlayView({ onPress }) {
     const [countdown, setCountdown] = useState(IMAGE_GENERATION_TIMEOUT);

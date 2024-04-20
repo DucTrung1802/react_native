@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Alert } from "react-native";
-import { GlobalStyles } from "../constants/styles";
+import { GlobalStyles } from "../constants/allConstants";
 import CustomButton from "./CustomButton";
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';

@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet } from 'react-native';
-import { GlobalStyles } from './constants/styles';
+import { GlobalStyles } from './constants/allConstants';
 
 import PhotoPickerScreen from './screens/PhotoPickerScreen';
 import PhotoFullScreen from './screens/PhotoFullScreen';
