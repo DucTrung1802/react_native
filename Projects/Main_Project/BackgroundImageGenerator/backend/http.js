@@ -79,10 +79,6 @@ export async function postImageToServer(image, prompt, nagativePrompt, cancelTok
         if (axios.isCancel(error)) {
             console.log('Request canceled:', error.message);
             return { "cancel": true }
-        } else {
-            console.log('Error:', error);
-            return { "error": true }
         }
-
     }
 }

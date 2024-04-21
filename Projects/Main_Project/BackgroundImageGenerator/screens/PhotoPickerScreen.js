@@ -288,7 +288,7 @@ function PhotoPickerScreen({ navigation }) {
         await appContext.setCancelToken(source)
 
         setIsGenerating(true);
-        while (isConnected && !response) {
+        while (!response) {
             response = await postImageToServer(appContext.mainImage, inputPrompt, inputNegativePrompt, source);
         }
         setIsGenerating(false);
