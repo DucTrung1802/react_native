@@ -54,7 +54,7 @@ export async function postImageToServer(image, prompt, nagativePrompt, cancelTok
     formData.append("prompt", prompt.trim())
     formData.append("negative_prompt", nagativePrompt.trim())
 
-    const extension = "png";
+    const extension = image.uri.split('.').pop().toLowerCase().length <= 4 ? image.uri.split('.').pop().toLowerCase() : "jpg";
     const imgType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
     const imgName = "input_image_" + String(Date.now()) + "." + extension
 
