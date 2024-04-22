@@ -296,8 +296,7 @@ function PhotoPickerScreen({ navigation }) {
         // Post-process response
         // console.log(response?.data["0"]?.slice(0, 300))
 
-        if (!response.cancel && response.data) {
-
+        try {
             var isResult = false
             Object.keys(response.data).forEach(async (key) => {
                 const filePath = `${FileSystem.documentDirectory}output_image_${String(Date.now())}.png`;
@@ -347,16 +346,9 @@ function PhotoPickerScreen({ navigation }) {
                 `We have generated ${Object.keys(response.data).length} images with new background for you. Swipe to see more images.`
             )
         }
-        else {
-            if (appContext.cancelToken) {
-                appContext.cancelToken.cancel('Request canceled by user')
-            }
-            else if (response?.error) {
-                Alert.alert(
-                    'Error!',
-                    `Unfortunately, error has occur!`
-                )
-            }
+        catch (error) {
+            setIsGenerated(false)
+            Alert.alert("Error", error)
         }
     }
 
